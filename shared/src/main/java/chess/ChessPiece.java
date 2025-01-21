@@ -1,6 +1,10 @@
 package chess;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Represents a single chess piece
@@ -13,6 +17,8 @@ public class ChessPiece {
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
     }
 
+    private ChessGame.TeamColor pieceColor;
+    private ChessPiece.PieceType type;
     /**
      * The various different chess piece options
      */
@@ -29,14 +35,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return this.pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return this.type;
     }
 
     /**
@@ -46,7 +52,62 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+    public List<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        List<ChessMove> valid_moves = new ArrayList<ChessMove>();
+        List<ChessPosition> possible_moves = new ArrayList<ChessPosition>();
+        switch(this.type) {
+            case KING:
+                for(int dy = -1; dy<=1; ++dy) {
+                    for (int dx = -1; dx <= 1; ++dx) {
+                        possible_moves.add(new ChessPosition(myPosition.getRow()+dy, myPosition.getColumn()+dx));
+
+                    }
+                }
+                break;
+            case QUEEN:
+                for(int dy = -8; dy<=8; ++dy){
+                    possible_moves.add(new ChessPosition(myPosition.getRow()+dy, myPosition.getColumn()));
+                }
+                for(int dx = -8; dx<=8; ++dx){
+                    possible_moves.add(new ChessPosition(myPosition.getRow(), myPosition.getColumn()+dx));
+                }
+                for(int d = -8; d<=8; ++d){
+                    possible_moves.add(new ChessPosition(myPosition.getRow()+d, myPosition.getColumn()+d));
+                    possible_moves.add(new ChessPosition(myPosition.getRow()-d, myPosition.getColumn()+d));
+                }
+                break;
+            case BISHOP:
+                // code block
+                break;
+            case KNIGHT:
+                // code block
+                break;
+            case ROOK:
+                // code block
+                break;
+            case PAWN:
+                // code block
+                break;
+            default:
+                throw new RuntimeException("Not implemented");
+        }
+
+        for(ChessPosition pose : possible_moves){
+            if(pose.getRow() == myPosition.getRow() && pose.getColumn() == myPosition.getColumn()){
+                continue;
+            }
+
+            if(pose.getRow() > 8 || pose.getRow() < 0){
+                continue;
+            }
+            if(pose.getColumn() > 8 || pose.getColumn() < 0){
+                continue;
+            }
+            if(board.getPiece(pose) == null) {
+                valid_moves.add(new ChessMove(myPosition, pose, null));
+            }
+        }
+
+        return valid_moves;
     }
 }
