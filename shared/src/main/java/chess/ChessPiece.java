@@ -77,16 +77,34 @@ public class ChessPiece {
                 }
                 break;
             case BISHOP:
-                // code block
+                for(int d = -8; d<=8; ++d){
+                    possible_moves.add(new ChessPosition(myPosition.getRow()+d, myPosition.getColumn()+d));
+                    possible_moves.add(new ChessPosition(myPosition.getRow()-d, myPosition.getColumn()+d));
+                }
                 break;
             case KNIGHT:
-                // code block
+                for(int dx = -2; dx<=2; dx+=2){
+                    for(int dy = -1; dy<=1; ++dy){
+                        possible_moves.add(new ChessPosition(myPosition.getRow()+dy, myPosition.getColumn()+dx));
+                    }
+                }
+                for(int dy = -2; dy<=2; dy+=2){
+                    for(int dx = -1; dx<=1; ++dx){
+                        possible_moves.add(new ChessPosition(myPosition.getRow()+dy, myPosition.getColumn()+dx));
+                    }
+                }
                 break;
             case ROOK:
-                // code block
+                for(int dy = -8; dy<=8; ++dy){
+                    possible_moves.add(new ChessPosition(myPosition.getRow()+dy, myPosition.getColumn()));
+                }
+                for(int dx = -8; dx<=8; ++dx){
+                    possible_moves.add(new ChessPosition(myPosition.getRow(), myPosition.getColumn()+dx));
+                }
                 break;
             case PAWN:
-                // code block
+                int dy=1;
+                possible_moves.add(new ChessPosition(myPosition.getRow()+dy, myPosition.getColumn()));
                 break;
             default:
                 throw new RuntimeException("Not implemented");
