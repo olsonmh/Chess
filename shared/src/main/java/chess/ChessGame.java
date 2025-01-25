@@ -10,9 +10,11 @@ import java.util.Collection;
  */
 public class ChessGame {
     private TeamColor turn;
+    private final ChessBoard chess_board;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
+        chess_board = new ChessBoard();
     }
 
     /**
@@ -47,7 +49,8 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ChessPiece piece = chess_board.getPiece(startPosition);
+        return piece.pieceMoves(chess_board,startPosition);
     }
 
     /**
@@ -57,7 +60,9 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPiece newPiece = chess_board.getPiece(move.getStartPosition());
+        chess_board.addPiece(move.getEndPosition(),newPiece);
+        chess_board.removePiece(move.getStartPosition());
     }
 
     /**
@@ -88,7 +93,16 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        for(int i = 1; i<=8; ++i){
+            for(int j = 1; j<=8; ++j){
+                ChessPiece piece = chess_board.board[i][j];
+                ChessPosition pose = new ChessPosition(i,j);
+                if(!piece.pieceMoves(chess_board, pose).isEmpty()){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -97,7 +111,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        chess_board.resetBoard();
     }
 
     /**
@@ -106,6 +120,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return chess_board;
     }
 }

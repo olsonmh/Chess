@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.Objects;
+
 /**
  * Represents moving a chess piece on a chessboard
  * <p>
@@ -8,12 +10,15 @@ package chess;
  */
 public class ChessMove {
 
-    private ChessPosition startPosition;
-    private ChessPosition endPosition;
-    private ChessPiece.PieceType promotionPiece;
+    private final ChessPosition startPosition;
+    private final ChessPosition endPosition;
+    private final ChessPiece.PieceType promotionPiece;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.promotionPiece = promotionPiece;
     }
 
     /**
@@ -37,9 +42,36 @@ public class ChessMove {
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
     public ChessPiece.PieceType getPromotionPiece() {
-        if(promotionPiece == null){
-            return null;
-        }
         return promotionPiece;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj == null){
+            return false;
+        }
+        if(obj.getClass() != this.getClass()){
+            return false;
+        }
+        ChessMove that = (ChessMove) obj;
+
+        if(this.promotionPiece == null){
+            if(that.promotionPiece != null){
+                return false;
+            }
+        }
+        if(that.promotionPiece == null){
+            if(this.promotionPiece != null){
+                return false;
+            }
+        }
+        if(this.promotionPiece != null){
+            return this.startPosition.equals(that.startPosition) && this.endPosition.equals(that.endPosition) && this.promotionPiece.equals(that.promotionPiece);
+        }
+        return this.startPosition.equals(that.startPosition) && this.endPosition.equals(that.endPosition);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(startPosition, endPosition, promotionPiece);
     }
 }
