@@ -329,13 +329,9 @@ public class ChessPiece {
         }
 
         for(ChessPosition pose : possible_moves){
-            if(pose.getRow() == myPosition.getRow() && pose.getColumn() == myPosition.getColumn()){
-                continue;
-            }
-            else{
+            if(pose.getRow() != myPosition.getRow() || pose.getColumn() != myPosition.getColumn()){
                 valid_moves.add(new ChessMove(myPosition, pose, null));
             }
-
         }
 
         return valid_moves;
