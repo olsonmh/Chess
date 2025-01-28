@@ -46,30 +46,14 @@ public class ChessMove {
     }
 
     @Override
-    public boolean equals(Object obj){
-        if(obj == null){
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        if(obj.getClass() != this.getClass()){
-            return false;
-        }
-        ChessMove that = (ChessMove) obj;
-
-        if(this.promotionPiece == null){
-            if(that.promotionPiece != null){
-                return false;
-            }
-        }
-        if(that.promotionPiece == null){
-            if(this.promotionPiece != null){
-                return false;
-            }
-        }
-        if(this.promotionPiece != null){
-            return this.startPosition.equals(that.startPosition) && this.endPosition.equals(that.endPosition) && this.promotionPiece.equals(that.promotionPiece);
-        }
-        return this.startPosition.equals(that.startPosition) && this.endPosition.equals(that.endPosition);
+        ChessMove chessMove = (ChessMove) o;
+        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(startPosition, endPosition, promotionPiece);
