@@ -10,8 +10,8 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard {
-    public final ChessPiece [][] board = new ChessPiece [8][8];
+public class ChessBoard implements Cloneable {
+    public ChessPiece [][] board = new ChessPiece [8][8];
 
     public ChessBoard() {
     }
@@ -24,6 +24,10 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[position.getRow()-1][position.getColumn()-1] = piece;
+    }
+
+    public void removePiece(ChessPosition pose){
+        board[pose.getRow()-1][pose.getColumn()-1] = null;
     }
     /**
      * Gets a chess piece on the chessboard
@@ -72,7 +76,7 @@ public class ChessBoard {
 
     public void printout(){
         for(int i = 0; i<=7; i++){
-            System.out.printf("|");
+            System.out.print("|");
             for(int j = 0; j<=7; j++){
                 char label;
                 ChessPiece piece = board[i][j];
@@ -80,34 +84,21 @@ public class ChessBoard {
                     label = ' ';
                 }
                 else{
-                switch(piece.getPieceType()){
-                    case PAWN:
-                        label = 'p';
-                        break;
-                    case ROOK:
-                        label = 'r';
-                        break;
-                    case KNIGHT:
-                        label = 'n';
-                        break;
-                    case QUEEN:
-                        label = 'q';
-                        break;
-                    case KING:
-                        label = 'k';
-                        break;
-                    case BISHOP:
-                        label = 'b';
-                        break;
-                    default:
-                        throw new RuntimeException("something is the wrong piece");
-                }
+                    label = switch (piece.getPieceType()) {
+                        case PAWN -> 'p';
+                        case ROOK -> 'r';
+                        case KNIGHT -> 'n';
+                        case QUEEN -> 'q';
+                        case KING -> 'k';
+                        case BISHOP -> 'b';
+                        default -> throw new RuntimeException("something is the wrong piece");
+                    };
                 if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
                     label = Character.toUpperCase(label);
                 }}
                 System.out.printf("%c|",label);
             }
-            System.out.printf("\n");
+            System.out.print("\n");
         }
     }
 
@@ -123,6 +114,26 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(board);
+    }
+
+    @Override
+    public ChessBoard clone() {
+        try {
+            ChessBoard clonedBoard = (ChessBoard) super.clone();
+            clonedBoard.board = new ChessPiece[8][8];
+
+            for (int i = 0; i<=7; ++i) {
+                for (int j = 0; j<=7; ++j) {
+                    if (this.board[i][j] != null) {
+                        clonedBoard.board[i][j] = this.board[i][j].clone();
+                    }
+                }
+            }
+
+            return clonedBoard;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Clone not supported", e);
+        }
     }
 
 }
