@@ -10,7 +10,7 @@ import java.util.Collection;
  */
 public class ChessGame {
     private TeamColor turn;
-    private final ChessBoard chess_board;
+    private ChessBoard chess_board;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
@@ -50,6 +50,9 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = chess_board.getPiece(startPosition);
+        if(piece == null){
+            return null;
+        }
         return piece.pieceMoves(chess_board,startPosition);
     }
 
@@ -62,8 +65,8 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPiece newPiece = chess_board.getPiece(move.getStartPosition());
         chess_board.addPiece(move.getEndPosition(),newPiece);
+        chess_board.removePiece((move.getStartPosition()));
     }
-
     /**
      * Determines if the given team is in check
      *
@@ -71,7 +74,18 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        for(int i=0; i<=7; ++i){
+            for(int j=0; j<=7; ++j){
+                ChessPiece piece = chess_board.getPiece(new ChessPosition(i,j));
+                if(piece != null){
+                    if(piece.getTeamColor() != teamColor){
+                        Collection<ChessMove> moves = validMoves(new ChessPosition(i,j));
+                        //iterate through moves and see if any of the end positions are e
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -110,7 +124,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        chess_board.resetBoard();
+        chess_board = board;
     }
 
     /**
