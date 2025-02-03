@@ -71,13 +71,32 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if(chess_board.getPiece(move.getStartPosition()) == null){
+            throw new InvalidMoveException();
+        }
         if(chess_board.getPiece(move.getStartPosition()).getTeamColor() == TeamColor.WHITE){
+            if(this.turn == TeamColor.BLACK){
+                throw new InvalidMoveException();
+            }
             turn = TeamColor.BLACK;
             }
         else{
+            if(this.turn == TeamColor.WHITE){
+                throw new InvalidMoveException();
+            }
             turn = TeamColor.WHITE;
             }
-        make_move(chess_board, move);
+        Collection<ChessMove> moves = validMoves(move.getStartPosition());
+        boolean move_made = false;
+        for(ChessMove valid_move : moves){
+            if(valid_move.equals(move)){
+                make_move(chess_board, move);
+                move_made = true;
+            }
+        }
+        if(!move_made){
+            throw new InvalidMoveException();
+        }
     }
     private boolean moveIntoCheck(ChessMove move){
         ChessBoard cloned_board = chess_board.clone();
@@ -88,9 +107,16 @@ public class ChessGame {
 
     private void make_move(ChessBoard board, ChessMove move){
         ChessPiece newPiece = board.getPiece(move.getStartPosition());
-        board.addPiece(move.getEndPosition(), newPiece);
+        if(move.getPromotionPiece() != null){
+            ChessPiece promoPiece = new ChessPiece(newPiece.getTeamColor(), move.getPromotionPiece());
+            board.addPiece(move.getEndPosition(), promoPiece);
+        }
+        else{
+            board.addPiece(move.getEndPosition(), newPiece);
+        }
         board.removePiece((move.getStartPosition()));
     }
+
     /**
      * Determines if the given team is in check
      *
@@ -143,12 +169,26 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         if(isInCheck(teamColor)){
-            ChessBoard cloned_board = chess_board.clone();
-            for(int i=0; i<=7; ++i){
-                for(int j=0; j<=7; ++j){
+            for(int i=1; i<=8; ++i){
+                for(int j=1; j<=8; ++j){
+                    ChessPosition pose = new ChessPosition(i,j);
+                    ChessPiece piece = chess_board.getPiece(pose);
+                    if(piece != null){
+                        if(piece.getTeamColor().equals(teamColor)){
+                            Collection<ChessMove> movesForPiece = validMoves(pose);
+                            for(ChessMove move : movesForPiece){
+                                ChessBoard cloned_board = chess_board.clone();
+                                make_move(cloned_board, move);
+                                if(!boardIsInCheck(teamColor, cloned_board)){
+                                    return false;
+                                }
+                            }
+                        }
+                    }
 
                 }
             }
+            return true;
         }
 
         return false;
@@ -164,10 +204,17 @@ public class ChessGame {
     public boolean isInStalemate(TeamColor teamColor) {
         for(int i = 1; i<=8; ++i){
             for(int j = 1; j<=8; ++j){
-                ChessPiece piece = chess_board.board[i][j];
                 ChessPosition pose = new ChessPosition(i,j);
-                if(!piece.pieceMoves(chess_board, pose).isEmpty()){
-                    return false;
+                ChessPiece piece = chess_board.getPiece(pose);
+                if(piece != null){
+                    if(piece.getTeamColor().equals(teamColor)){
+                        Collection<ChessMove> moves = piece.pieceMoves(chess_board, pose);
+                        for(ChessMove move : moves){
+                            if(!moveIntoCheck(move)){
+                                return false;
+                            }
+                        }
+                    }
                 }
             }
         }
