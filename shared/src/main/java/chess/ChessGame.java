@@ -71,9 +71,13 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        ChessPiece newPiece = chess_board.getPiece(move.getStartPosition());
-        chess_board.addPiece(move.getEndPosition(),newPiece);
-        chess_board.removePiece((move.getStartPosition()));
+        if(chess_board.getPiece(move.getStartPosition()).getTeamColor() == TeamColor.WHITE){
+            turn = TeamColor.BLACK;
+            }
+        else{
+            turn = TeamColor.WHITE;
+            }
+        make_move(chess_board, move);
     }
     private boolean moveIntoCheck(ChessMove move){
         ChessBoard cloned_board = chess_board.clone();
