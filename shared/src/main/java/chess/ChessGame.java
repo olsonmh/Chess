@@ -16,6 +16,7 @@ public class ChessGame {
     public ChessGame() {
         turn = TeamColor.WHITE;
         chess_board = new ChessBoard();
+        chess_board.resetBoard();
     }
 
     /**
@@ -51,11 +52,11 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         Collection<ChessMove> valid_moves = new HashSet<ChessMove>();
-        ChessPiece piece = chess_board.getPiece(startPosition);
+        ChessPiece piece = this.chess_board.getPiece(startPosition);
         if(piece == null){
             return null;
         }
-        Collection<ChessMove> moves =  piece.pieceMoves(chess_board,startPosition);
+        Collection<ChessMove> moves =  piece.pieceMoves(this.chess_board,startPosition);
         for(ChessMove move : moves){
             if(!moveIntoCheck(move)){
                 valid_moves.add(move);
@@ -71,10 +72,10 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        if(chess_board.getPiece(move.getStartPosition()) == null){
+        if(this.chess_board.getPiece(move.getStartPosition()) == null){
             throw new InvalidMoveException();
         }
-        if(chess_board.getPiece(move.getStartPosition()).getTeamColor() == TeamColor.WHITE){
+        if(this.chess_board.getPiece(move.getStartPosition()).getTeamColor() == TeamColor.WHITE){
             if(this.turn == TeamColor.BLACK){
                 throw new InvalidMoveException();
             }
@@ -99,7 +100,7 @@ public class ChessGame {
         }
     }
     private boolean moveIntoCheck(ChessMove move){
-        ChessBoard cloned_board = chess_board.clone();
+        ChessBoard cloned_board = this.chess_board.clone();
         ChessPiece piece = cloned_board.getPiece(move.getStartPosition());
         make_move(cloned_board, move);
         return boardIsInCheck(piece.getTeamColor(),cloned_board);
@@ -172,12 +173,12 @@ public class ChessGame {
             for(int i=1; i<=8; ++i){
                 for(int j=1; j<=8; ++j){
                     ChessPosition pose = new ChessPosition(i,j);
-                    ChessPiece piece = chess_board.getPiece(pose);
+                    ChessPiece piece = this.chess_board.getPiece(pose);
                     if(piece != null){
                         if(piece.getTeamColor().equals(teamColor)){
                             Collection<ChessMove> movesForPiece = validMoves(pose);
                             for(ChessMove move : movesForPiece){
-                                ChessBoard cloned_board = chess_board.clone();
+                                ChessBoard cloned_board = this.chess_board.clone();
                                 make_move(cloned_board, move);
                                 if(!boardIsInCheck(teamColor, cloned_board)){
                                     return false;
@@ -205,10 +206,10 @@ public class ChessGame {
         for(int i = 1; i<=8; ++i){
             for(int j = 1; j<=8; ++j){
                 ChessPosition pose = new ChessPosition(i,j);
-                ChessPiece piece = chess_board.getPiece(pose);
+                ChessPiece piece = this.chess_board.getPiece(pose);
                 if(piece != null){
                     if(piece.getTeamColor().equals(teamColor)){
-                        Collection<ChessMove> moves = piece.pieceMoves(chess_board, pose);
+                        Collection<ChessMove> moves = piece.pieceMoves(this.chess_board, pose);
                         for(ChessMove move : moves){
                             if(!moveIntoCheck(move)){
                                 return false;
@@ -218,7 +219,7 @@ public class ChessGame {
                 }
             }
         }
-        return true;
+        return !isInCheckmate(teamColor);
     }
 
     /**
@@ -227,7 +228,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        chess_board = board;
+        this.chess_board = board;
     }
 
     /**
@@ -236,6 +237,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        return chess_board;
+        return this.chess_board;
     }
 }
