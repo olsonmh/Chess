@@ -4,51 +4,28 @@ package chess;
 import java.util.Arrays;
 import java.util.Objects;
 
-/**
- * A chessboard that can hold and rearrange chess pieces.
- * <p>
- * Note: You can add to this class, but you may not alter
- * signature of the existing methods.
- */
 public class ChessBoard implements Cloneable {
-    public ChessPiece [][] board = new ChessPiece [8][8];
+    public ChessPiece [][] board = new ChessPiece [8][8];  //creates the chessboard as an 8 by 8 array
 
     public ChessBoard() {
     }
 
-    /**
-     * Adds a chess piece to the chessboard
-     *
-     * @param position where to add the piece to
-     * @param piece    the piece to add
-     */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board[position.getRow()-1][position.getColumn()-1] = piece;
+        board[position.getRow()-1][position.getColumn()-1] = piece;  //does -1 -1 on the position so we can use 1 to 8 indexing instead of 0 to 7
     }
 
     public void removePiece(ChessPosition pose){
-        board[pose.getRow()-1][pose.getColumn()-1] = null;
+        board[pose.getRow()-1][pose.getColumn()-1] = null;  //used for moving pieces
     }
-    /**
-     * Gets a chess piece on the chessboard
-     *
-     * @param position The position to get the piece from
-     * @return Either the piece at the position, or null if no piece is at that
-     * position
-     */
 
     public ChessPiece getPiece(ChessPosition position) {
         return board[position.getRow()-1][position.getColumn()-1];
     }
 
-    /**
-     * Sets the board to the default starting board
-     * (How the game of chess normally starts)
-     */
     public void resetBoard() {
         for(int i=0;i<=7; ++i){
             for(int j=0; j<=7; ++j){
-                board[i][j] = null;
+                board[i][j] = null;  //sets everything on the board equal to null before placing pieces
             }
         }
         for(int col = 1; col<=8; ++col){
@@ -73,7 +50,8 @@ public class ChessBoard implements Cloneable {
         this.addPiece(new ChessPosition(8,7), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
         this.addPiece(new ChessPosition(8,8), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
     }
-
+    //this is a function for visualizing the printed out chessboard.  used for debug purposes.
+    /**
     public void printout(){
         for(int i = 0; i<=7; i++){
             System.out.print("|");
@@ -91,7 +69,6 @@ public class ChessBoard implements Cloneable {
                         case QUEEN -> 'q';
                         case KING -> 'k';
                         case BISHOP -> 'b';
-                        default -> throw new RuntimeException("something is the wrong piece");
                     };
                 if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
                     label = Character.toUpperCase(label);
@@ -101,6 +78,7 @@ public class ChessBoard implements Cloneable {
             System.out.print("\n");
         }
     }
+     */
 
     @Override
     public boolean equals(Object o) {
@@ -117,7 +95,7 @@ public class ChessBoard implements Cloneable {
     }
 
     @Override
-    public ChessBoard clone() {
+    public ChessBoard clone() {  //clone methode for deep copying instead of shallow copies.
         try {
             ChessBoard clonedBoard = (ChessBoard) super.clone();
             clonedBoard.board = new ChessPiece[8][8];

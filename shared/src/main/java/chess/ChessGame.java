@@ -51,14 +51,14 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        Collection<ChessMove> valid_moves = new HashSet<ChessMove>();
+        Collection<ChessMove> valid_moves = new HashSet<>();
         ChessPiece piece = this.chess_board.getPiece(startPosition);
         if(piece == null){
             return null;
         }
         Collection<ChessMove> moves =  piece.pieceMoves(this.chess_board,startPosition);
         for(ChessMove move : moves){
-            if(!moveIntoCheck(move)){
+            if(DoesNotMoveIntoCheck(move)){
                 valid_moves.add(move);
             }
         }
@@ -72,10 +72,10 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        if(this.chess_board.getPiece(move.getStartPosition()) == null){
+        if(this.chess_board.getPiece(move.startPosition()) == null){
             throw new InvalidMoveException();
         }
-        if(this.chess_board.getPiece(move.getStartPosition()).getTeamColor() == TeamColor.WHITE){
+        if(this.chess_board.getPiece(move.startPosition()).getTeamColor() == TeamColor.WHITE){
             if(this.turn == TeamColor.BLACK){
                 throw new InvalidMoveException();
             }
@@ -87,7 +87,7 @@ public class ChessGame {
             }
             turn = TeamColor.WHITE;
             }
-        Collection<ChessMove> moves = validMoves(move.getStartPosition());
+        Collection<ChessMove> moves = validMoves(move.startPosition());
         boolean move_made = false;
         for(ChessMove valid_move : moves){
             if(valid_move.equals(move)){
@@ -99,23 +99,23 @@ public class ChessGame {
             throw new InvalidMoveException();
         }
     }
-    private boolean moveIntoCheck(ChessMove move){
+    private boolean DoesNotMoveIntoCheck(ChessMove move){
         ChessBoard cloned_board = this.chess_board.clone();
-        ChessPiece piece = cloned_board.getPiece(move.getStartPosition());
+        ChessPiece piece = cloned_board.getPiece(move.startPosition());
         make_move(cloned_board, move);
-        return boardIsInCheck(piece.getTeamColor(),cloned_board);
+        return !boardIsInCheck(piece.getTeamColor(), cloned_board);
     }
 
     private void make_move(ChessBoard board, ChessMove move){
-        ChessPiece newPiece = board.getPiece(move.getStartPosition());
-        if(move.getPromotionPiece() != null){
-            ChessPiece promoPiece = new ChessPiece(newPiece.getTeamColor(), move.getPromotionPiece());
-            board.addPiece(move.getEndPosition(), promoPiece);
+        ChessPiece newPiece = board.getPiece(move.startPosition());
+        if(move.promotionPiece() != null){
+            ChessPiece promoPiece = new ChessPiece(newPiece.getTeamColor(), move.promotionPiece());
+            board.addPiece(move.endPosition(), promoPiece);
         }
         else{
-            board.addPiece(move.getEndPosition(), newPiece);
+            board.addPiece(move.endPosition(), newPiece);
         }
-        board.removePiece((move.getStartPosition()));
+        board.removePiece((move.startPosition()));
     }
 
     /**
@@ -151,7 +151,7 @@ public class ChessGame {
                     if(piece.getTeamColor() != teamColor){
                         Collection<ChessMove> moves = piece.pieceMoves(board,new ChessPosition(i,j));
                         for(ChessMove move : moves){
-                            if(move.getEndPosition().equals(kingPosition)){
+                            if(move.endPosition().equals(kingPosition)){
                                 return true;
                             }
                         }
@@ -211,7 +211,7 @@ public class ChessGame {
                     if(piece.getTeamColor().equals(teamColor)){
                         Collection<ChessMove> moves = piece.pieceMoves(this.chess_board, pose);
                         for(ChessMove move : moves){
-                            if(!moveIntoCheck(move)){
+                            if(DoesNotMoveIntoCheck(move)){
                                 return false;
                             }
                         }
