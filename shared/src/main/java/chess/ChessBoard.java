@@ -99,7 +99,6 @@ public class ChessBoard implements Cloneable {
         try {
             ChessBoard clonedBoard = (ChessBoard) super.clone();
             clonedBoard.board = new ChessPiece[8][8];
-
             for (int i = 0; i<=7; ++i) {
                 for (int j = 0; j<=7; ++j) {
                     if (this.board[i][j] != null) {
