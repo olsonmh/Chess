@@ -6,7 +6,14 @@ import java.util.Objects;
 
 public class ChessBoard implements Cloneable {
     public ChessPiece [][] board = new ChessPiece [8][8];  //creates the chessboard as an 8 by 8 array
-
+    //
+    public boolean BlackKing = true;
+    public boolean WhiteKing = true;
+    public boolean rightWhiteRook = true;
+    public boolean leftWhiteRook = true;
+    public boolean rightBlackRook = true;
+    public boolean leftBlackRook = true;
+    //
     public ChessBoard() {
     }
 
@@ -78,7 +85,7 @@ public class ChessBoard implements Cloneable {
             System.out.print("\n");
         }
     }
-     */
+    */
 
     @Override
     public boolean equals(Object o) {
