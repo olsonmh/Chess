@@ -3,15 +3,8 @@ package chess;
 import chess.pieceMoves.*;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 
-/**
- * Represents a single chess piece
- * <p>
- * Note: You can add to this class, but you may not alter
- * signature of the existing methods.
- */
 public class ChessPiece implements Cloneable {
 
     private final ChessGame.TeamColor pieceColor;
@@ -22,10 +15,6 @@ public class ChessPiece implements Cloneable {
         this.type = type;
     }
 
-
-    /**
-     * The various different chess piece options
-     */
     public enum PieceType {
         KING,
         QUEEN,
@@ -35,16 +24,10 @@ public class ChessPiece implements Cloneable {
         PAWN
     }
 
-    /**
-     * @return Which team this chess piece belongs to
-     */
     public ChessGame.TeamColor getTeamColor() {
         return this.pieceColor;
     }
 
-    /**
-     * @return which type of chess piece this piece is
-     */
     public PieceType getPieceType() {
         return this.type;
     }
@@ -63,13 +46,6 @@ public class ChessPiece implements Cloneable {
         return Objects.hash(pieceColor, type);
     }
 
-    /**
-     * Calculates all the positions a chess piece can move to
-     * Does not take into account moves that are illegal due to leaving the king in
-     * danger
-     *
-     * @return Collection of valid moves
-     */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pose){
         moveCalc moves = switch(getPieceType()){
             case KING -> new kingMoveCalc();
@@ -83,7 +59,7 @@ public class ChessPiece implements Cloneable {
     }
 
     @Override
-    public ChessPiece clone() {
+    public ChessPiece clone() { //allows the chess piece to be cloned (shallow copy)
         try {
             return (ChessPiece) super.clone();
         } catch (CloneNotSupportedException e) {

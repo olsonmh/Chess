@@ -10,8 +10,6 @@ import java.util.HashSet;
 
 public abstract class  moveCalc {
     public Collection<ChessMove> pieceMoves2(ChessBoard board, ChessPosition myPosition){
-        //Collection<ChessMove> valid_moves = new HashSet<>();
-        //return valid_moves;
         return new HashSet<>();
     }
 
