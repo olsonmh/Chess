@@ -1,6 +1,10 @@
 package service;
 import service.requestResult.*;
 
-public class ClearService {
-    public void clearAll(DelAllRequest delAllReuqest){}
+public class ClearService extends Service{
+    public void clearAll(){
+        userData.clearUserData();
+        authData.clearAuthTokens();
+        gameData.clearGames();
+    }
 }

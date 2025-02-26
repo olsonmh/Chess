@@ -28,8 +28,9 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public void updateGame() {
-        throw new RuntimeException();
+    public void updateGame(GameData gameData) {
+        this.memoryGameData.remove(gameData.gameID());
+        this.memoryGameData.put(gameData.gameID(), gameData);
     }
 
     @Override
