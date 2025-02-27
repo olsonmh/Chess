@@ -15,7 +15,7 @@ public class GameService extends Service{
             Collection<GameData> listOfGames = gameData.listGames();
             return new ListGamesResult(listOfGames);
         }
-        throw new AuthTokenNotFound("Not logged in");
+        throw new AuthTokenNotFoundException("Not logged in");
 
     }
 
@@ -27,7 +27,7 @@ public class GameService extends Service{
             gameData.createGame(new GameData(gameID, null, null, createGameRequest.gameName(), game));
             return new CreateGameResult(gameID);
         }
-        throw new AuthTokenNotFound("Not logged in");
+        throw new AuthTokenNotFoundException("Not logged in");
     }
 
 
@@ -47,6 +47,6 @@ public class GameService extends Service{
             }
             throw new GameNotFoundException("Game does not exist.");
         }
-        throw new AuthTokenNotFound("Not logged in");
+        throw new AuthTokenNotFoundException("Not logged in");
     }
 }

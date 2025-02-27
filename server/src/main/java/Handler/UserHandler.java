@@ -1,7 +1,10 @@
 package Handler;
 import com.google.gson.Gson;
 import chess.*;
+import service.exceptions.AuthTokenNotFoundException;
 import service.exceptions.UserExistException;
+import service.exceptions.UserNotFoundException;
+import service.exceptions.WrongPasswordException;
 import service.requestResult.*;
 import service.Service;
 import service.UserService;
@@ -27,5 +30,15 @@ public class UserHandler {
         return serializer.toJson(registerResult);
     }
 
+    public String loginUser(String json) throws WrongPasswordException, UserNotFoundException {
+        LoginRequest loginRequest = serializer.fromJson(json, LoginRequest.class);
+        LoginResult loginResult = service.login(loginRequest);
+        return serializer.toJson(loginResult);
+    }
+
+    public void logoutUser(String json) throws AuthTokenNotFoundException {
+        LogoutRequest logoutRequest = serializer.fromJson(json, LogoutRequest.class);
+        service.logout(logoutRequest);
+    }
 
 }

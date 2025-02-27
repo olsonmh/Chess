@@ -35,7 +35,7 @@ public class UserService extends Service{
 
     public void logout(LogoutRequest logoutRequest) {
         if(authData.getAuth(logoutRequest.authToken()) == null){
-            throw new AuthTokenNotFound("Logout unsuccessful. AuthToken not found.");
+            throw new AuthTokenNotFoundException("Logout unsuccessful. AuthToken not found.");
         }
         authData.deleteAuth(logoutRequest.authToken());
     }
