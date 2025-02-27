@@ -8,6 +8,7 @@ import java.util.Collection;
 
 
 public class GameService extends Service{
+
     public ListGamesResult listGames(ListGamesRequest listGamesRequest) {
         AuthData auth = authData.getAuth(listGamesRequest.authToken());
         if(auth != null){

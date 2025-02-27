@@ -4,9 +4,9 @@ import java.util.UUID;
 import java.util.Random;
 
 public abstract class Service {
-    public static AuthDAO authData;
-    public static GameDAO gameData;
-    public static UserDAO userData;
+    protected static AuthDAO authData = new MemoryAuthDAO();
+    protected static GameDAO gameData = new MemoryGameDAO();
+    protected static UserDAO userData = new MemoryUserDAO();
 
     public static String generateToken() {
         return UUID.randomUUID().toString();

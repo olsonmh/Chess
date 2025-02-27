@@ -7,7 +7,8 @@ public class UserService extends Service{
 
     public RegisterResult register(RegisterRequest registerRequest) {
         UserData user = new UserData(registerRequest.username(),registerRequest.password(),registerRequest.email());
-        if(userData.getUser(user.password()) == null){
+
+        if(userData.getUser(user.username()) == null){
             userData.createUser(user);
             AuthData auth = new AuthData(generateToken(),user.username());
             authData.createAuth(auth);
