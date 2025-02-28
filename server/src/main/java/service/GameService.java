@@ -37,9 +37,9 @@ public class GameService extends Service{
             GameData game = gameData.getGame(joinGameRequest.gameID());
             if(game != null){
                 switch(joinGameRequest.playerColor()){
-                    case "Black":
+                    case "BLACK":
                         gameData.updateGame(new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game()));
-                    case "White":
+                    case "WHITE":
                         gameData.updateGame(new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game()));
                     default:
                         throw new RuntimeException();

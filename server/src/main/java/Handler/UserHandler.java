@@ -36,8 +36,8 @@ public class UserHandler {
         return serializer.toJson(loginResult);
     }
 
-    public void logoutUser(String json) throws AuthTokenNotFoundException {
-        LogoutRequest logoutRequest = serializer.fromJson(json, LogoutRequest.class);
+    public void logoutUser(String authToken) throws AuthTokenNotFoundException {
+        LogoutRequest logoutRequest = new LogoutRequest(authToken);
         service.logout(logoutRequest);
     }
 

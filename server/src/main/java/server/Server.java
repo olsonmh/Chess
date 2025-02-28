@@ -4,7 +4,6 @@ import service.exceptions.*;
 import spark.*;
 import Handler.*;
 
-import java.util.ResourceBundle;
 
 public class Server {
 
@@ -23,6 +22,7 @@ public class Server {
         Spark.delete("/session", this::logoutUser);
         Spark.get("/game", this::listAllGames);
         Spark.post("/game", this::createNewGame);
+        Spark.put("/game", this::joinNewGame);
         Spark.delete("/db", this::clear);
 
         //This line initializes the server and can be removed once you have a functioning endpoint 
@@ -69,8 +69,7 @@ public class Server {
 
     private Object logoutUser(Request req, Response res){
         try{
-            userHandler.logoutUser(req.body());
-            res.type("application/json");
+            userHandler.logoutUser(req.headers("authorization"));
             return "{}";
         } catch(AuthTokenNotFoundException e){
             res.type("application/json");
@@ -83,7 +82,7 @@ public class Server {
 
     private Object listAllGames(Request req, Response res){
         try{
-            String json = gameHandler.listAllGames(req.body());
+            String json = gameHandler.listAllGames(req.headers("authorization"));
             res.type("application/json");
             return json;
         } catch(AuthTokenNotFoundException e){
@@ -97,7 +96,7 @@ public class Server {
 
     private Object createNewGame(Request req, Response res){
         try{
-            String json = gameHandler.createNewGame(req.body());
+            String json = gameHandler.createNewGame(req.headers("authorization"), req.body());
             res.type("application/json");
             return json;
         } catch(AuthTokenNotFoundException e){
@@ -111,8 +110,8 @@ public class Server {
 
     private Object joinNewGame(Request req, Response res){
         try{
-            gameHandler.joinNewGame(req.body());
-            res.type("application/json");
+            gameHandler.joinNewGame(req.headers("authorization"), req.body());
+            //res.type("application/json");
             return "{}";
         } catch(AuthTokenNotFoundException e){
             res.type("application/json");
