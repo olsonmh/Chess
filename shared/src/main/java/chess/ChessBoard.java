@@ -80,35 +80,6 @@ public class ChessBoard implements Cloneable {
         this.rightBlackRook = true;
         this.leftBlackRook = true;
     }
-    //this is a function for visualizing the printed out chessboard.  used for debug purposes.
-    /**
-    public void printout(){
-        for(int i = 0; i<=7; i++){
-            System.out.print("|");
-            for(int j = 0; j<=7; j++){
-                char label;
-                ChessPiece piece = board[i][j];
-                if(piece == null){
-                    label = ' ';
-                }
-                else{
-                    label = switch (piece.getPieceType()) {
-                        case PAWN -> 'p';
-                        case ROOK -> 'r';
-                        case KNIGHT -> 'n';
-                        case QUEEN -> 'q';
-                        case KING -> 'k';
-                        case BISHOP -> 'b';
-                    };
-                if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
-                    label = Character.toUpperCase(label);
-                }}
-                System.out.printf("%c|",label);
-            }
-            System.out.print("\n");
-        }
-    }
-    */
 
     @Override
     public boolean equals(Object o) {

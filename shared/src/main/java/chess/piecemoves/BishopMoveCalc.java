@@ -10,31 +10,23 @@ import java.util.HashSet;
 public class BishopMoveCalc extends MoveCalc {
     public Collection<ChessMove> pieceMoves2(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> validMoves = new HashSet<>();
-        for(int j=-1; j<=1; j+=2){
-            for(int d = 1; d<=8; ++d){
-                ChessPosition pose = new ChessPosition(myPosition.getRow()+(d*j), myPosition.getColumn()+(d*j));
-                if(inBounds(pose, myPosition)){
-                    if(board.getPiece(pose) != null){
-                        if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
-                            validMoves.add(new ChessMove(myPosition, pose, null));
-                        }
-                        break;
+        for(int i = -1; i <= 1; i += 2){
+            for(int j=-1; j<=1; j+=2){
+                for(int d = 1; d<=8; ++d){
+                    ChessPosition pose = new ChessPosition(myPosition.getRow()+i*(d*j), myPosition.getColumn()+(d*j));
+                    if(!inBounds(pose, myPosition)) {
+                        continue;
                     }
-                    else{validMoves.add(new ChessMove(myPosition, pose, null));}
-                }
-            }
-        }
-        for(int j=-1; j<=1; j+=2){
-            for(int d = 1; d<=8; ++d){
-                ChessPosition pose = new ChessPosition(myPosition.getRow()-(d*j), myPosition.getColumn()+(d*j));
-                if(inBounds(pose, myPosition)){
-                    if(board.getPiece(pose) != null){
-                        if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
-                            validMoves.add(new ChessMove(myPosition, pose, null));
-                        }
-                        break;
+
+                    if(board.getPiece(pose) == null){
+                        validMoves.add(new ChessMove(myPosition, pose, null));
+                        continue;
                     }
-                    else{validMoves.add(new ChessMove(myPosition, pose, null));}
+
+                    if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
+                        validMoves.add(new ChessMove(myPosition, pose, null));
+                    }
+                    break;
                 }
             }
         }
