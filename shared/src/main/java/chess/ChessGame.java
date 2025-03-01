@@ -162,10 +162,10 @@ public class ChessGame {
 
     /**private methods*/
     private boolean doesNotMoveIntoCheck(ChessMove move){
-        ChessBoard cloned_board = this.chessBoard.clone();
-        ChessPiece piece = cloned_board.getPiece(move.getStartPosition());
-        makeMovePrivate(cloned_board, move);
-        return !boardIsInCheck(piece.getTeamColor(), cloned_board);
+        ChessBoard clonedBoard = this.chessBoard.clone();
+        ChessPiece piece = clonedBoard.getPiece(move.getStartPosition());
+        makeMovePrivate(clonedBoard, move);
+        return !boardIsInCheck(piece.getTeamColor(), clonedBoard);
     }
 
     private boolean boardIsInCheck(TeamColor teamColor, ChessBoard board) {

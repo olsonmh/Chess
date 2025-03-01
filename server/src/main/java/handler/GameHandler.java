@@ -27,7 +27,10 @@ public class GameHandler {
         return serializer.toJson(createGameResult);
     }
 
-    public void joinNewGame(String authToken, String json) throws GameNotFoundException, AuthTokenNotFoundException, PlayerAlreadyTakenException, WrongColorException {
+    public void joinNewGame(String authToken, String json) throws GameNotFoundException,
+                                                                  AuthTokenNotFoundException,
+                                                                  PlayerAlreadyTakenException,
+                                                                  WrongColorException {
         JoinGameRequest joinGameRequest = serializer.fromJson(json, JoinGameRequest.class);
         joinGameRequest = new JoinGameRequest(authToken, joinGameRequest.playerColor(), joinGameRequest.gameID());
         service.joinGame(joinGameRequest);
