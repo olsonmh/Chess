@@ -1,4 +1,4 @@
-package chess.pieceMoves;
+package chess.piecemoves;
 
 import chess.ChessBoard;
 import chess.ChessMove;
@@ -7,12 +7,12 @@ import chess.ChessPosition;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class rookMoveCalc extends moveCalc{
+public class bishopMoveCalc extends moveCalc{
     public Collection<ChessMove> pieceMoves2(ChessBoard board, ChessPosition myPosition){
         Collection<ChessMove> valid_moves = new HashSet<>();
         for(int j=-1; j<=1; j+=2){
-            for(int dy=1; dy<=8; ++dy){
-                ChessPosition pose = new ChessPosition(myPosition.getRow()+(dy*j), myPosition.getColumn());
+            for(int d = 1; d<=8; ++d){
+                ChessPosition pose = new ChessPosition(myPosition.getRow()+(d*j), myPosition.getColumn()+(d*j));
                 if(inBounds(pose, myPosition)){
                     if(board.getPiece(pose) != null){
                         if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
@@ -25,8 +25,8 @@ public class rookMoveCalc extends moveCalc{
             }
         }
         for(int j=-1; j<=1; j+=2){
-            for(int dx=1; dx<=8; ++dx){
-                ChessPosition pose = new ChessPosition(myPosition.getRow(), myPosition.getColumn()+(dx*j));
+            for(int d = 1; d<=8; ++d){
+                ChessPosition pose = new ChessPosition(myPosition.getRow()-(d*j), myPosition.getColumn()+(d*j));
                 if(inBounds(pose, myPosition)){
                     if(board.getPiece(pose) != null){
                         if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
