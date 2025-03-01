@@ -1,8 +1,13 @@
 package dataaccess;
 import model.GameData;
+import model.GameDataForListing;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.LinkedList;
+
+
 
 public class MemoryGameDAO implements GameDAO{
     private final Map<Integer, GameData> memoryGameData;
@@ -23,8 +28,13 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public Collection<GameData> listGames() {
-        return this.memoryGameData.values();
+    public Collection<GameDataForListing> listGames() {
+        return this.memoryGameData.values().stream().map(gameData -> new GameDataForListing(
+                gameData.gameID(),
+                gameData.whiteUsername(),
+                gameData.blackUsername(),
+                gameData.gameName()))
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import service.UserService;
 import service.exceptions.AuthTokenNotFoundException;
 import service.exceptions.GameNotFoundException;
+import service.exceptions.PlayerAlreadyTakenException;
 import service.requestResult.*;
 import service.GameService;
 
@@ -28,7 +29,7 @@ public class GameHandler {
         return serializer.toJson(createGameResult);
     }
 
-    public void joinNewGame(String authToken, String json) throws GameNotFoundException, AuthTokenNotFoundException {
+    public void joinNewGame(String authToken, String json) throws GameNotFoundException, AuthTokenNotFoundException, PlayerAlreadyTakenException {
         JoinGameRequest joinGameRequest = serializer.fromJson(json, JoinGameRequest.class);
         joinGameRequest = new JoinGameRequest(authToken, joinGameRequest.playerColor(), joinGameRequest.gameID());
         service.joinGame(joinGameRequest);

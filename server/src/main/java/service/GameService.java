@@ -12,7 +12,7 @@ public class GameService extends Service{
     public ListGamesResult listGames(ListGamesRequest listGamesRequest) {
         AuthData auth = authData.getAuth(listGamesRequest.authToken());
         if(auth != null){
-            Collection<GameData> listOfGames = gameData.listGames();
+            Collection<GameDataForListing> listOfGames = gameData.listGames();
             return new ListGamesResult(listOfGames);
         }
         throw new AuthTokenNotFoundException("Not logged in");
@@ -38,9 +38,17 @@ public class GameService extends Service{
             if(game != null){
                 switch(joinGameRequest.playerColor()){
                     case "BLACK":
-                        gameData.updateGame(new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game()));
+                        if(game.blackUsername() == null){
+                            gameData.updateGame(new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game()));
+                            return;
+                        }
+                        throw new PlayerAlreadyTakenException("Player color is already being used.");
                     case "WHITE":
-                        gameData.updateGame(new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game()));
+                        if(game.whiteUsername() == null){
+                            gameData.updateGame(new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game()));
+                            return;
+                        }
+                        throw new PlayerAlreadyTakenException("Player color is already being used.");
                     default:
                         throw new RuntimeException();
                 }

@@ -125,6 +125,12 @@ public class Server {
             String error = "{ \"message\": \"Error: game not found\" }";
             res.body(error);
             return error;
+        } catch(PlayerAlreadyTakenException e) {
+            res.type("application/json");
+            res.status(403);
+            String error = "{ \"message\": \"Error: player color already in use.\" }";
+            res.body(error);
+            return error;
         }
     }
 
