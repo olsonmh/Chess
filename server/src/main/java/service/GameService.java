@@ -4,6 +4,7 @@ import chess.ChessGame;
 import service.requestResult.*;
 import model.*;
 import service.exceptions.*;
+
 import java.util.Collection;
 
 
@@ -21,40 +22,55 @@ public class GameService extends Service{
 
     public CreateGameResult createGame(CreateGameRequest createGameRequest) {
         AuthData auth = authData.getAuth(createGameRequest.authToken());
-        if(auth != null){
-            int gameID = generateGameID();
-            ChessGame game = new ChessGame();
-            gameData.createGame(new GameData(gameID, null, null, createGameRequest.gameName(), game));
-            return new CreateGameResult(gameID);
+        if(auth == null){
+            throw new AuthTokenNotFoundException("Not logged in");
         }
-        throw new AuthTokenNotFoundException("Not logged in");
+
+        int gameID = generateGameID();
+        ChessGame game = new ChessGame();
+        gameData.createGame(new GameData(gameID, null, null, createGameRequest.gameName(), game));
+        return new CreateGameResult(gameID);
+
     }
 
 
     public void joinGame(JoinGameRequest joinGameRequest) {
         AuthData auth = authData.getAuth(joinGameRequest.authToken());
-        if(auth != null){
-            GameData game = gameData.getGame(joinGameRequest.gameID());
-            if(game != null){
-                switch(joinGameRequest.playerColor()){
-                    case "BLACK":
-                        if(game.blackUsername() == null){
-                            gameData.updateGame(new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), game.game()));
-                            return;
-                        }
-                        throw new PlayerAlreadyTakenException("Player color is already being used.");
-                    case "WHITE":
-                        if(game.whiteUsername() == null){
-                            gameData.updateGame(new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), game.game()));
-                            return;
-                        }
-                        throw new PlayerAlreadyTakenException("Player color is already being used.");
-                    default:
-                        throw new RuntimeException();
-                }
-            }
+        if (auth == null) {
+            throw new AuthTokenNotFoundException("Not logged in");
+        }
+
+        GameData game = gameData.getGame(joinGameRequest.gameID());
+
+        if (game == null) {
             throw new GameNotFoundException("Game does not exist.");
         }
-        throw new AuthTokenNotFoundException("Not logged in");
+
+        switch (joinGameRequest.playerColor()) {
+            case "BLACK":
+                if (game.blackUsername() == null) {
+                    gameData.updateGame(new GameData(game.gameID(),
+                                                     game.whiteUsername(),
+                                                     auth.username(),
+                                                     game.gameName(),
+                                                     game.game()));
+                    return;
+                }
+                throw new PlayerAlreadyTakenException("Player color is already being used.");
+            case "WHITE":
+                if (game.whiteUsername() == null) {
+                    gameData.updateGame(new GameData(game.gameID(),
+                                                     auth.username(),
+                                                     game.blackUsername(),
+                                                     game.gameName(),
+                                                     game.game()));
+                    return;
+                }
+                throw new PlayerAlreadyTakenException("Player color is already being used.");
+            case null:
+            default:
+                throw new WrongColorException("Color does not exist.");
+        }
     }
+
 }

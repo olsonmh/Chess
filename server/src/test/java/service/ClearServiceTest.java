@@ -1,13 +1,7 @@
 package service;
-import model.*;
-
-import org.junit.jupiter.api.*;
-
-import service.exceptions.*;
 import service.requestResult.*;
 
-import java.util.Objects;
-
+import org.junit.jupiter.api.*;
 
 public class ClearServiceTest {
     private UserService userService;

@@ -1,6 +1,7 @@
 package dataaccess;
 import model.GameData;
 import model.GameDataForListing;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,9 +18,8 @@ public class MemoryGameDAO implements GameDAO{
     }
 
     @Override
-    public int createGame(GameData gameData) {
+    public void createGame(GameData gameData) {
         this.memoryGameData.put(gameData.gameID(), gameData);
-        return gameData.gameID();
     }
 
     @Override

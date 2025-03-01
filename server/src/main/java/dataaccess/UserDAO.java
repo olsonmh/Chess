@@ -3,10 +3,11 @@ import model.UserData;
 
 public interface UserDAO {
 
+    void createUser(UserData user);
 
-    public void createUser(UserData user);
-    public UserData getUser(String username);
-    public void clearUserData();
+    UserData getUser(String username);
+
+    void clearUserData();
 
 }
 

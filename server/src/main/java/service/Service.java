@@ -11,6 +11,7 @@ public abstract class Service {
     public static String generateToken() {
         return UUID.randomUUID().toString();
     }
+
     public static int generateGameID() {
         Random random = new Random();
         return 100000 + random.nextInt(900000);

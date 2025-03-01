@@ -43,6 +43,12 @@ public class Server {
             String error = "{ \"message\": \"Error: already taken\" }";
             res.body(error);
             return error;
+        } catch(BadRegisterRequestException e){
+            res.type("application/json");
+            res.status(400);
+            String error = "{ \"message\": \"Error: bad request\" }";
+            res.body(error);
+            return error;
         }
 
     }
@@ -60,7 +66,7 @@ public class Server {
             return error;
         } catch(UserNotFoundException e){
             res.type("application/json");
-            res.status(404);
+            res.status(401);
             String error = "{ \"message\": \"Error: user not found\" }";
             res.body(error);
             return error;
@@ -73,8 +79,8 @@ public class Server {
             return "{}";
         } catch(AuthTokenNotFoundException e){
             res.type("application/json");
-            res.status(404);
-            String error = "{ \"message\": \"Error: user not found\" }";
+            res.status(401);
+            String error = "{ \"message\": \"Error: unauthorized\" }";
             res.body(error);
             return error;
         }
@@ -111,7 +117,6 @@ public class Server {
     private Object joinNewGame(Request req, Response res){
         try{
             gameHandler.joinNewGame(req.headers("authorization"), req.body());
-            //res.type("application/json");
             return "{}";
         } catch(AuthTokenNotFoundException e){
             res.type("application/json");
@@ -121,14 +126,20 @@ public class Server {
             return error;
         } catch(GameNotFoundException e){
             res.type("application/json");
-            res.status(404);
-            String error = "{ \"message\": \"Error: game not found\" }";
+            res.status(400);
+            String error = "{ \"message\": \"Error: bad request\" }";
             res.body(error);
             return error;
         } catch(PlayerAlreadyTakenException e) {
             res.type("application/json");
             res.status(403);
             String error = "{ \"message\": \"Error: player color already in use.\" }";
+            res.body(error);
+            return error;
+        } catch(WrongColorException e) {
+            res.type("application/json");
+            res.status(400);
+            String error = "{ \"message\": \"Error: team color does not exist\" }";
             res.body(error);
             return error;
         }

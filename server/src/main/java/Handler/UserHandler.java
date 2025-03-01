@@ -1,20 +1,12 @@
 package Handler;
-import com.google.gson.Gson;
-import chess.*;
-import service.exceptions.AuthTokenNotFoundException;
-import service.exceptions.UserExistException;
-import service.exceptions.UserNotFoundException;
-import service.exceptions.WrongPasswordException;
+
+import service.exceptions.*;
 import service.requestResult.*;
-import service.Service;
 import service.UserService;
 
+import com.google.gson.Gson;
 
 public class UserHandler {
-    //Gson serializer = new Gson();
-    //ChessGame game = new ChessGame();
-    //String json = serializer.toJson(game);
-    //ChessGame unSerialGame = serializer.fromJson(json, ChessGame.class);
 
     private final Gson serializer;
     private final UserService service = new UserService();
@@ -23,7 +15,7 @@ public class UserHandler {
         this.serializer = new Gson();
     }
 
-    public String registerUser(String json) throws UserExistException {
+    public String registerUser(String json) throws UserExistException, BadRegisterRequestException {
         RegisterRequest registerRequest = serializer.fromJson(json,RegisterRequest.class);
 
         RegisterResult registerResult = service.register(registerRequest);

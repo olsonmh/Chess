@@ -1,6 +1,5 @@
 package Handler;
 
-import com.google.gson.Gson;
 import service.ClearService;
 
 public class ClearHandler {

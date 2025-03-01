@@ -1,17 +1,14 @@
 package service;
+
 import chess.ChessGame;
 import model.*;
-
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
-
 import service.exceptions.*;
 import service.requestResult.*;
 
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 import java.util.Objects;
-
-
 
 public class GameServiceTests {
     private GameService gameService;
