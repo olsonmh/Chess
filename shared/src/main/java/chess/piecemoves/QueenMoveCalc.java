@@ -7,20 +7,20 @@ import chess.ChessPosition;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class queenMoveCalc extends moveCalc{
+public class QueenMoveCalc extends MoveCalc {
     public Collection<ChessMove> pieceMoves2(ChessBoard board, ChessPosition myPosition){
-        Collection<ChessMove> valid_moves = new HashSet<>();
+        Collection<ChessMove> validMoves = new HashSet<>();
         for(int j=-1; j<=1; j+=2){
             for(int dy=1; dy<=8; ++dy){
                 ChessPosition pose = new ChessPosition(myPosition.getRow()+(dy*j), myPosition.getColumn());
                 if(inBounds(pose, myPosition)){
                     if(board.getPiece(pose) != null){
                         if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
-                            valid_moves.add(new ChessMove(myPosition, pose, null));
+                            validMoves.add(new ChessMove(myPosition, pose, null));
                         }
                         break;
                     }
-                    else{valid_moves.add(new ChessMove(myPosition, pose, null));}
+                    else{validMoves.add(new ChessMove(myPosition, pose, null));}
                 }
             }
         }
@@ -30,11 +30,11 @@ public class queenMoveCalc extends moveCalc{
                 if(inBounds(pose, myPosition)){
                     if(board.getPiece(pose) != null){
                         if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
-                            valid_moves.add(new ChessMove(myPosition, pose, null));
+                            validMoves.add(new ChessMove(myPosition, pose, null));
                         }
                         break;
                     }
-                    else{valid_moves.add(new ChessMove(myPosition, pose, null));}
+                    else{validMoves.add(new ChessMove(myPosition, pose, null));}
                 }
             }
         }
@@ -44,11 +44,11 @@ public class queenMoveCalc extends moveCalc{
                 if(inBounds(pose, myPosition)){
                     if(board.getPiece(pose) != null){
                         if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
-                            valid_moves.add(new ChessMove(myPosition, pose, null));
+                            validMoves.add(new ChessMove(myPosition, pose, null));
                         }
                         break;
                     }
-                    else{valid_moves.add(new ChessMove(myPosition, pose, null));}
+                    else{validMoves.add(new ChessMove(myPosition, pose, null));}
                 }
             }
         }
@@ -58,14 +58,14 @@ public class queenMoveCalc extends moveCalc{
                 if(inBounds(pose, myPosition)){
                     if(board.getPiece(pose) != null){
                         if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
-                            valid_moves.add(new ChessMove(myPosition, pose, null));
+                            validMoves.add(new ChessMove(myPosition, pose, null));
                         }
                         break;
                     }
-                    else{valid_moves.add(new ChessMove(myPosition, pose, null));}
+                    else{validMoves.add(new ChessMove(myPosition, pose, null));}
                 }
             }
         }
-        return valid_moves;
+        return validMoves;
     }
 }

@@ -1,7 +1,7 @@
 package service;
 
 import service.exceptions.*;
-import service.requestResult.*;
+import service.objects.*;
 import model.*;
 
 import java.util.Objects;

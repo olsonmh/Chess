@@ -1,7 +1,7 @@
-package Handler;
+package handler;
 
 import service.exceptions.*;
-import service.requestResult.*;
+import service.objects.*;
 import service.GameService;
 
 import com.google.gson.Gson;

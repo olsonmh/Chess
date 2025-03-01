@@ -2,7 +2,7 @@ package server;
 
 import service.exceptions.*;
 import spark.*;
-import Handler.*;
+import handler.*;
 
 
 public class Server {

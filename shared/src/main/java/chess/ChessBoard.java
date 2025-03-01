@@ -5,8 +5,8 @@ import java.util.Objects;
 
 public class ChessBoard implements Cloneable {
     public ChessPiece [][] board = new ChessPiece [8][8];
-    public boolean BlackKing = true;
-    public boolean WhiteKing = true;
+    public boolean blackKing = true;
+    public boolean whiteKing = true;
     public boolean rightWhiteRook = true;
     public boolean leftWhiteRook = true;
     public boolean rightBlackRook = true;
@@ -73,8 +73,8 @@ public class ChessBoard implements Cloneable {
         this.addPiece(new ChessPosition(8,8), new ChessPiece(ChessGame.TeamColor.BLACK,
                                                                        ChessPiece.PieceType.ROOK));
 
-        this.WhiteKing = true;
-        this.BlackKing = true;
+        this.whiteKing = true;
+        this.blackKing = true;
         this.rightWhiteRook = true;
         this.leftWhiteRook = true;
         this.rightBlackRook = true;

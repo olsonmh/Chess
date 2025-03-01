@@ -47,13 +47,13 @@ public class ChessPiece implements Cloneable {
     }
 
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pose){
-        moveCalc moves = switch(getPieceType()){
-            case KING -> new kingMoveCalc();
-            case PAWN -> new pawnMoveCalc();
-            case ROOK -> new rookMoveCalc();
-            case KNIGHT -> new knightMoveCalc();
-            case QUEEN -> new queenMoveCalc();
-            case BISHOP -> new bishopMoveCalc();
+        MoveCalc moves = switch(getPieceType()){
+            case KING -> new KingMoveCalc();
+            case PAWN -> new PawnMoveCalc();
+            case ROOK -> new RookMoveCalc();
+            case KNIGHT -> new KnightMoveCalc();
+            case QUEEN -> new QueenMoveCalc();
+            case BISHOP -> new BishopMoveCalc();
         };
         return moves.pieceMoves2(board, pose);
     }

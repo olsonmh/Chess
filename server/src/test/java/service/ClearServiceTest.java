@@ -1,5 +1,5 @@
 package service;
-import service.requestResult.*;
+import service.objects.*;
 
 import org.junit.jupiter.api.*;
 

@@ -8,7 +8,7 @@ import chess.ChessPosition;
 import java.util.Collection;
 import java.util.HashSet;
 
-public abstract class  moveCalc {
+public abstract class MoveCalc {
     public Collection<ChessMove> pieceMoves2(ChessBoard board, ChessPosition myPosition){
         return new HashSet<>();
     }

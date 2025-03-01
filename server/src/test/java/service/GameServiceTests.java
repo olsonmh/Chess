@@ -3,7 +3,7 @@ package service;
 import chess.ChessGame;
 import model.*;
 import service.exceptions.*;
-import service.requestResult.*;
+import service.objects.*;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -86,7 +86,7 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Negative Join Game Test")
-    public void NegativeJoinGameTest() {
+    public void negativeJoinGameTest() {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "password", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
         String authToken = registerResult.authToken();

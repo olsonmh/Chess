@@ -2,7 +2,7 @@ package service;
 
 import model.*;
 import service.exceptions.*;
-import service.requestResult.*;
+import service.objects.*;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
