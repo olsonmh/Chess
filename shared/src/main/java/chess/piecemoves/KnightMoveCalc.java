@@ -13,27 +13,31 @@ public class KnightMoveCalc extends MoveCalc {
         for(int j=-1; j<=1; j+=2){
             for(int dx=-1; dx<=1; dx+=2){
                 ChessPosition pose = new ChessPosition(myPosition.getRow()+2*j, myPosition.getColumn()+dx);
-                if(inBounds(pose, myPosition)){
-                    if(board.getPiece(pose) != null){
-                        if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
-                            validMoves.add(new ChessMove(myPosition, pose, null));
-                        }
-                    }
-                    else{validMoves.add(new ChessMove(myPosition, pose, null));}
+                if(!inBounds(pose, myPosition)){
+                    continue;
                 }
+
+                if(board.getPiece(pose) != null){
+                    if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
+                        validMoves.add(new ChessMove(myPosition, pose, null));
+                    }
+                }
+                else{validMoves.add(new ChessMove(myPosition, pose, null));}
             }
         }
         for(int j=-1; j<=1; j+=2){
             for(int dy=-1; dy<=1; dy+=2){
                 ChessPosition pose = new ChessPosition(myPosition.getRow()+dy, myPosition.getColumn()+2*j);
-                if(inBounds(pose, myPosition)){
-                    if(board.getPiece(pose) != null){
-                        if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
-                            validMoves.add(new ChessMove(myPosition, pose, null));
-                        }
-                    }
-                    else{validMoves.add(new ChessMove(myPosition, pose, null));}
+                if(!inBounds(pose, myPosition)) {
+                    continue;
                 }
+
+                if(board.getPiece(pose) != null){
+                    if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
+                        validMoves.add(new ChessMove(myPosition, pose, null));
+                    }
+                }
+                else{validMoves.add(new ChessMove(myPosition, pose, null));}
             }
         }
         return validMoves;

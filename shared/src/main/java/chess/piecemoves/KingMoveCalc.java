@@ -11,14 +11,16 @@ public class KingMoveCalc extends MoveCalc {
         for(int dy=-1; dy<=1; ++dy){
             for(int dx=-1; dx<=1; ++dx){
                 ChessPosition pose = new ChessPosition(myPosition.getRow()+dy, myPosition.getColumn()+dx);
-                if(inBounds(pose, myPosition)){
-                    if(board.getPiece(pose) != null){
-                        if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
-                            validMoves.add(new ChessMove(myPosition, pose, null));
-                        }
-                    }
-                    else{validMoves.add(new ChessMove(myPosition, pose, null));}
+                if(!inBounds(pose, myPosition)) {
+                    continue;
                 }
+
+                if(board.getPiece(pose) != null){
+                    if(board.getPiece(pose).getTeamColor() != board.getPiece(myPosition).getTeamColor()){
+                        validMoves.add(new ChessMove(myPosition, pose, null));
+                    }
+                }
+                else{validMoves.add(new ChessMove(myPosition, pose, null));}
             }
         }
         //castling
