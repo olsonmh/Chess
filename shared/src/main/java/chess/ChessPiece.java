@@ -50,8 +50,8 @@ public class ChessPiece implements Cloneable {
         moveCalc moves = switch(getPieceType()){
             case KING -> new kingMoveCalc();
             case PAWN -> new pawnMoveCalc();
-            case ROOK -> new rookMoveCalc();
-            case KNIGHT -> new knightMoveCalc();
+            case ROOK -> new RookMoveCalc();
+            case KNIGHT -> new knightmovecalc();
             case QUEEN -> new queenMoveCalc();
             case BISHOP -> new bishopMoveCalc();
         };
