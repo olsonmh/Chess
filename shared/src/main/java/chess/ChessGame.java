@@ -45,12 +45,18 @@ public class ChessGame {
                 if(this.chess_board.getPiece(startPosition).getPieceType().equals(ChessPiece.PieceType.KING)){
                     if(isCastleMove(move, this.chess_board)){
                         if(move.getStartPosition().getColumn() > move.getEndPosition().getColumn()){
-                            if(DoesNotMoveIntoCheck(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(),startPosition.getColumn()-1), null))){
+                            if(DoesNotMoveIntoCheck(
+                                    new ChessMove(startPosition,
+                                                  new ChessPosition(startPosition.getRow(),
+                                                          startPosition.getColumn()-1), null))){
                                 valid_moves.add(move);
                             }
                         }
                         else{
-                            if(DoesNotMoveIntoCheck(new ChessMove(startPosition, new ChessPosition(startPosition.getRow(),startPosition.getColumn()+1), null))){
+                            if(DoesNotMoveIntoCheck(
+                                    new ChessMove(startPosition,
+                                            new ChessPosition(startPosition.getRow(),
+                                                    startPosition.getColumn()+1), null))){
                                 valid_moves.add(move);
                             }
                         }
@@ -199,14 +205,16 @@ public class ChessGame {
     private boolean isCastleMove(ChessMove move, ChessBoard board){
         switch(board.getPiece(move.getStartPosition()).getTeamColor()){
             case WHITE:
-                if(move.getEndPosition().equals(new ChessPosition(1,3)) || move.getEndPosition().equals(new ChessPosition(1,7))){
+                if(move.getEndPosition().equals(new ChessPosition(1,3)) ||
+                   move.getEndPosition().equals(new ChessPosition(1,7))){
                     if(move.getStartPosition().equals(new ChessPosition(1,5))){
                         return true;
                     }
                 }
                 break;
             case BLACK:
-                if(move.getEndPosition().equals(new ChessPosition(8,3)) || move.getEndPosition().equals(new ChessPosition(8,7))){
+                if(move.getEndPosition().equals(new ChessPosition(8,3)) ||
+                   move.getEndPosition().equals(new ChessPosition(8,7))){
                     if(move.getStartPosition().equals(new ChessPosition(8,5))){
                         return true;
                     }

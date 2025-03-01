@@ -1,24 +1,22 @@
 package chess;
 
-
 import java.util.Arrays;
 import java.util.Objects;
 
 public class ChessBoard implements Cloneable {
-    public ChessPiece [][] board = new ChessPiece [8][8];  //creates the chessboard as an 8 by 8 array
-    //
+    public ChessPiece [][] board = new ChessPiece [8][8];
     public boolean BlackKing = true;
     public boolean WhiteKing = true;
     public boolean rightWhiteRook = true;
     public boolean leftWhiteRook = true;
     public boolean rightBlackRook = true;
     public boolean leftBlackRook = true;
-    //
+
     public ChessBoard() {
     }
 
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board[position.getRow()-1][position.getColumn()-1] = piece;  //does -1 -1 on the position so we can use 1 to 8 indexing instead of 0 to 7
+        board[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
     public void removePiece(ChessPosition pose){
@@ -36,26 +34,44 @@ public class ChessBoard implements Cloneable {
             }
         }
         for(int col = 1; col<=8; ++col){
-            this.addPiece(new ChessPosition(2,col), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
-            this.addPiece(new ChessPosition(7,col), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+            this.addPiece(new ChessPosition(2,col), new ChessPiece(ChessGame.TeamColor.WHITE,
+                                                                        ChessPiece.PieceType.PAWN));
+            this.addPiece(new ChessPosition(7,col), new ChessPiece(ChessGame.TeamColor.BLACK,
+                                                                        ChessPiece.PieceType.PAWN));
         }
-        this.addPiece(new ChessPosition(1,1), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
-        this.addPiece(new ChessPosition(1,2), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
-        this.addPiece(new ChessPosition(1,3), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
-        this.addPiece(new ChessPosition(1,4), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
-        this.addPiece(new ChessPosition(1,5), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
-        this.addPiece(new ChessPosition(1,6), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
-        this.addPiece(new ChessPosition(1,7), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
-        this.addPiece(new ChessPosition(1,8), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+        this.addPiece(new ChessPosition(1,1), new ChessPiece(ChessGame.TeamColor.WHITE,
+                                                                       ChessPiece.PieceType.ROOK));
+        this.addPiece(new ChessPosition(1,2), new ChessPiece(ChessGame.TeamColor.WHITE,
+                                                                       ChessPiece.PieceType.KNIGHT));
+        this.addPiece(new ChessPosition(1,3), new ChessPiece(ChessGame.TeamColor.WHITE,
+                                                                       ChessPiece.PieceType.BISHOP));
+        this.addPiece(new ChessPosition(1,4), new ChessPiece(ChessGame.TeamColor.WHITE,
+                                                                       ChessPiece.PieceType.QUEEN));
+        this.addPiece(new ChessPosition(1,5), new ChessPiece(ChessGame.TeamColor.WHITE,
+                                                                       ChessPiece.PieceType.KING));
+        this.addPiece(new ChessPosition(1,6), new ChessPiece(ChessGame.TeamColor.WHITE,
+                                                                       ChessPiece.PieceType.BISHOP));
+        this.addPiece(new ChessPosition(1,7), new ChessPiece(ChessGame.TeamColor.WHITE,
+                                                                       ChessPiece.PieceType.KNIGHT));
+        this.addPiece(new ChessPosition(1,8), new ChessPiece(ChessGame.TeamColor.WHITE,
+                                                                       ChessPiece.PieceType.ROOK));
 
-        this.addPiece(new ChessPosition(8,1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
-        this.addPiece(new ChessPosition(8,2), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
-        this.addPiece(new ChessPosition(8,3), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
-        this.addPiece(new ChessPosition(8,4), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
-        this.addPiece(new ChessPosition(8,5), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
-        this.addPiece(new ChessPosition(8,6), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
-        this.addPiece(new ChessPosition(8,7), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
-        this.addPiece(new ChessPosition(8,8), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+        this.addPiece(new ChessPosition(8,1), new ChessPiece(ChessGame.TeamColor.BLACK,
+                                                                       ChessPiece.PieceType.ROOK));
+        this.addPiece(new ChessPosition(8,2), new ChessPiece(ChessGame.TeamColor.BLACK,
+                                                                       ChessPiece.PieceType.KNIGHT));
+        this.addPiece(new ChessPosition(8,3), new ChessPiece(ChessGame.TeamColor.BLACK,
+                                                                       ChessPiece.PieceType.BISHOP));
+        this.addPiece(new ChessPosition(8,4), new ChessPiece(ChessGame.TeamColor.BLACK,
+                                                                       ChessPiece.PieceType.QUEEN));
+        this.addPiece(new ChessPosition(8,5), new ChessPiece(ChessGame.TeamColor.BLACK,
+                                                                       ChessPiece.PieceType.KING));
+        this.addPiece(new ChessPosition(8,6), new ChessPiece(ChessGame.TeamColor.BLACK,
+                                                                       ChessPiece.PieceType.BISHOP));
+        this.addPiece(new ChessPosition(8,7), new ChessPiece(ChessGame.TeamColor.BLACK,
+                                                                       ChessPiece.PieceType.KNIGHT));
+        this.addPiece(new ChessPosition(8,8), new ChessPiece(ChessGame.TeamColor.BLACK,
+                                                                       ChessPiece.PieceType.ROOK));
 
         this.WhiteKing = true;
         this.BlackKing = true;
