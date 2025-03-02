@@ -1,6 +1,8 @@
 package service.exceptions;
 
-public class WrongPasswordException extends RuntimeException {
+import dataaccess.DataAccessException;
+
+public class WrongPasswordException extends DataAccessException {
     public WrongPasswordException(String message) {
         super(message);
     }

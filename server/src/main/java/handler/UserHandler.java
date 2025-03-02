@@ -17,7 +17,6 @@ public class UserHandler {
 
     public String registerUser(String json) throws UserExistException, BadRegisterRequestException {
         RegisterRequest registerRequest = serializer.fromJson(json,RegisterRequest.class);
-
         RegisterResult registerResult = service.register(registerRequest);
         return serializer.toJson(registerResult);
     }

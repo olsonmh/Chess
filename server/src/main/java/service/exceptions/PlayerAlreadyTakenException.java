@@ -1,6 +1,8 @@
 package service.exceptions;
 
-public class PlayerAlreadyTakenException extends RuntimeException {
+import dataaccess.DataAccessException;
+
+public class PlayerAlreadyTakenException extends DataAccessException {
     public PlayerAlreadyTakenException(String message) {
         super(message);
     }

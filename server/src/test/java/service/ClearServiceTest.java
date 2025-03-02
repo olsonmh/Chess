@@ -1,4 +1,7 @@
 package service;
+import service.exceptions.AuthTokenNotFoundException;
+import service.exceptions.BadRegisterRequestException;
+import service.exceptions.UserExistException;
 import service.objects.*;
 
 import org.junit.jupiter.api.*;
@@ -17,7 +20,7 @@ public class ClearServiceTest {
 
     @Test
     @DisplayName("Positive Clear Test")
-    public void positiveClearTest() {
+    public void positiveClearTest() throws AuthTokenNotFoundException, UserExistException, BadRegisterRequestException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "hello", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
         RegisterRequest registerRequest2 = new RegisterRequest("greg", "whatNow", "greg@email.com");

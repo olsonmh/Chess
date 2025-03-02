@@ -1,6 +1,8 @@
 package service.exceptions;
 
-public class BadRegisterRequestException extends RuntimeException {
+import dataaccess.DataAccessException;
+
+public class BadRegisterRequestException extends DataAccessException {
     public BadRegisterRequestException(String message) {
         super(message);
     }

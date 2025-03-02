@@ -23,7 +23,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Positive Register Test")
-    public void positiveRegisterTest() {
+    public void positiveRegisterTest() throws UserExistException, BadRegisterRequestException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "hello", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
         assert Objects.equals(registerResult.username(), "Micah");
@@ -38,7 +38,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Negative Register Test")
-    public void negativeRegisterTest() {
+    public void negativeRegisterTest() throws UserExistException, BadRegisterRequestException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "hello", "micah@email.com");
         userService.register(registerRequest);
 
@@ -51,7 +51,8 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Positive Login Test")
-    public void positiveLoginTest() {
+    public void positiveLoginTest() throws UserExistException, BadRegisterRequestException,
+                                           UserNotFoundException, WrongPasswordException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "hello", "micah@email.com");
         userService.register(registerRequest);
 
@@ -63,7 +64,7 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Negative Login Test")
-    public void negativeLoginTest() {
+    public void negativeLoginTest() throws UserExistException, BadRegisterRequestException {
         LoginRequest loginRequest = new LoginRequest("Micah", "hello");
 
         assertThrows(UserNotFoundException.class, () -> {
@@ -81,7 +82,9 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Positive Logout Test")
-    public void positiveLogoutTest() {
+    public void positiveLogoutTest() throws AuthTokenNotFoundException,
+                                            UserExistException,
+                                            BadRegisterRequestException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "hello", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
         String authToken = registerResult.authToken();
@@ -94,7 +97,9 @@ public class UserServiceTests {
 
     @Test
     @DisplayName("Negative Logout Test")
-    public void negativeLogoutTest() {
+    public void negativeLogoutTest() throws AuthTokenNotFoundException,
+                                            UserExistException,
+                                            BadRegisterRequestException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "hello", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
         String authToken = registerResult.authToken();

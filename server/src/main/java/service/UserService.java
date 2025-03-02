@@ -8,7 +8,8 @@ import java.util.Objects;
 
 public class UserService extends Service{
 
-    public RegisterResult register(RegisterRequest registerRequest) {
+    public RegisterResult register(RegisterRequest registerRequest) throws BadRegisterRequestException,
+                                                                           UserExistException {
         if(registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null){
             throw new BadRegisterRequestException("Invalid username, password, or email were given.");
         }
@@ -25,7 +26,7 @@ public class UserService extends Service{
         return new RegisterResult(auth.username(), auth.authToken());
     }
 
-    public LoginResult login(LoginRequest loginRequest) {
+    public LoginResult login(LoginRequest loginRequest) throws UserNotFoundException, WrongPasswordException {
         UserData user = userData.getUser(loginRequest.username());
 
         if(user == null){
@@ -40,7 +41,7 @@ public class UserService extends Service{
         return new LoginResult(auth.username(), auth.authToken());
     }
 
-    public void logout(LogoutRequest logoutRequest) {
+    public void logout(LogoutRequest logoutRequest) throws AuthTokenNotFoundException{
         if(authData.getAuth(logoutRequest.authToken()) == null){
             throw new AuthTokenNotFoundException("Logout unsuccessful. AuthToken not found.");
         }

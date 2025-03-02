@@ -10,7 +10,7 @@ import java.util.Collection;
 
 public class GameService extends Service{
 
-    public ListGamesResult listGames(ListGamesRequest listGamesRequest) {
+    public ListGamesResult listGames(ListGamesRequest listGamesRequest) throws AuthTokenNotFoundException{
         AuthData auth = authData.getAuth(listGamesRequest.authToken());
         if(auth != null){
             Collection<GameDataForListing> listOfGames = gameData.listGames();
@@ -20,7 +20,7 @@ public class GameService extends Service{
 
     }
 
-    public CreateGameResult createGame(CreateGameRequest createGameRequest) {
+    public CreateGameResult createGame(CreateGameRequest createGameRequest) throws AuthTokenNotFoundException{
         AuthData auth = authData.getAuth(createGameRequest.authToken());
         if(auth == null){
             throw new AuthTokenNotFoundException("Not logged in");
@@ -34,7 +34,10 @@ public class GameService extends Service{
     }
 
 
-    public void joinGame(JoinGameRequest joinGameRequest) {
+    public void joinGame(JoinGameRequest joinGameRequest) throws AuthTokenNotFoundException,
+                                                                 GameNotFoundException,
+                                                                 PlayerAlreadyTakenException,
+                                                                 WrongColorException {
         AuthData auth = authData.getAuth(joinGameRequest.authToken());
         if (auth == null) {
             throw new AuthTokenNotFoundException("Not logged in");

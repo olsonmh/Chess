@@ -1,6 +1,8 @@
 package service.exceptions;
 
-public class UserNotFoundException extends RuntimeException {
+import dataaccess.DataAccessException;
+
+public class UserNotFoundException extends DataAccessException {
     public UserNotFoundException(String message) {
         super(message);
     }

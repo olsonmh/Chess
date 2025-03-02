@@ -1,6 +1,8 @@
 package service.exceptions;
 
-public class GameNotFoundException extends RuntimeException {
+import dataaccess.DataAccessException;
+
+public class GameNotFoundException extends DataAccessException {
     public GameNotFoundException(String message) {
         super(message);
     }

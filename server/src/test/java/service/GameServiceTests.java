@@ -28,7 +28,9 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Positive Create Game Test")
-    public void positiveCreateGameTest() {
+    public void positiveCreateGameTest() throws AuthTokenNotFoundException,
+                                                UserExistException,
+                                                BadRegisterRequestException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "password", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
 
@@ -59,7 +61,12 @@ public class GameServiceTests {
 
         @Test
         @DisplayName("Positive Join Game Test")
-        public void positiveJoinGameTest() {
+        public void positiveJoinGameTest() throws AuthTokenNotFoundException,
+                                                  UserExistException,
+                                                  BadRegisterRequestException,
+                                                  PlayerAlreadyTakenException,
+                                                  WrongColorException,
+                                                  GameNotFoundException {
             RegisterRequest registerRequest = new RegisterRequest("Micah", "password", "micah@email.com");
             RegisterResult registerResult = userService.register(registerRequest);
             String authTokenPlayerOne = registerResult.authToken();
@@ -86,7 +93,9 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Negative Join Game Test")
-    public void negativeJoinGameTest() {
+    public void negativeJoinGameTest() throws AuthTokenNotFoundException,
+                                              UserExistException,
+                                              BadRegisterRequestException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "password", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
         String authToken = registerResult.authToken();
@@ -112,7 +121,12 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Negative Join Game Test 2")
-    public void negativeJoinGameTest2() {
+    public void negativeJoinGameTest2() throws AuthTokenNotFoundException,
+                                               UserExistException,
+                                               BadRegisterRequestException,
+                                               PlayerAlreadyTakenException,
+                                               WrongColorException,
+                                               GameNotFoundException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "password", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
         String authTokenPlayerOne = registerResult.authToken();
@@ -139,7 +153,9 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Positive List Games Test")
-    public void positiveListGamesTest() {
+    public void positiveListGamesTest() throws AuthTokenNotFoundException,
+                                               UserExistException,
+                                               BadRegisterRequestException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "password", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
 
@@ -162,7 +178,9 @@ public class GameServiceTests {
 
     @Test
     @DisplayName("Negative List Games Test")
-    public void negativeListGamesTest() {
+    public void negativeListGamesTest() throws AuthTokenNotFoundException,
+                                               UserExistException,
+                                               BadRegisterRequestException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "password", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
 
