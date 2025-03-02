@@ -95,7 +95,12 @@ public class GameServiceTests {
     @DisplayName("Negative Join Game Test")
     public void negativeJoinGameTest() throws AuthTokenNotFoundException,
                                               UserExistException,
-                                              BadRegisterRequestException {
+                                              BadRegisterRequestException,
+                                              UserNotFoundException,
+                                              WrongPasswordException,
+                                              PlayerAlreadyTakenException,
+                                              WrongColorException,
+                                              GameNotFoundException {
         RegisterRequest registerRequest = new RegisterRequest("Micah", "password", "micah@email.com");
         RegisterResult registerResult = userService.register(registerRequest);
         String authToken = registerResult.authToken();
@@ -117,37 +122,20 @@ public class GameServiceTests {
         assertThrows(AuthTokenNotFoundException.class, () -> {
             gameService.joinGame(joinGameRequest2);
         });
-    }
 
-    @Test
-    @DisplayName("Negative Join Game Test 2")
-    public void negativeJoinGameTest2() throws AuthTokenNotFoundException,
-                                               UserExistException,
-                                               BadRegisterRequestException,
-                                               PlayerAlreadyTakenException,
-                                               WrongColorException,
-                                               GameNotFoundException {
-        RegisterRequest registerRequest = new RegisterRequest("Micah", "password", "micah@email.com");
-        RegisterResult registerResult = userService.register(registerRequest);
-        String authTokenPlayerOne = registerResult.authToken();
+        LoginRequest loginRequest = new LoginRequest("Micah", "password");
+        LoginResult loginResult = userService.login(loginRequest);
+        String authToken2 = loginResult.authToken();
+        JoinGameRequest joinGameRequest3 = new JoinGameRequest(authToken2, "WHITE", gameID);
+        gameService.joinGame(joinGameRequest3);
 
         RegisterRequest registerRequest2 = new RegisterRequest("Greg", "betterPassword", "greg@email.com");
         RegisterResult registerResult2 = userService.register(registerRequest2);
         String authTokenPlayerTwo = registerResult2.authToken();
-
-        CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "NewGame");
-        CreateGameResult createGameResult = gameService.createGame(createGameRequest);
-        int gameID = createGameResult.gameID();
-
-        JoinGameRequest joinGameRequest = new JoinGameRequest(authTokenPlayerOne, "WHITE", gameID);
-        gameService.joinGame(joinGameRequest);
-
-        assert Objects.equals(Service.gameData.getGame(gameID).whiteUsername(), "Micah");
-
-        JoinGameRequest joinGameRequest2 = new JoinGameRequest(authTokenPlayerTwo, "WHITE", gameID);
+        JoinGameRequest joinGameRequest4 = new JoinGameRequest(authTokenPlayerTwo, "WHITE", gameID);
 
         assertThrows(PlayerAlreadyTakenException.class, () -> {
-            gameService.joinGame(joinGameRequest2);
+            gameService.joinGame(joinGameRequest4);
         });
     }
 
