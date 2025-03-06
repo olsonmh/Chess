@@ -43,9 +43,7 @@ public class UserServiceTests {
         userService.register(registerRequest);
 
         RegisterRequest registerRequest2 = new RegisterRequest("Micah", "funTimes", "ineedanemail@email.com");
-        assertThrows(UserExistException.class, () -> {
-            userService.register(registerRequest2);
-        });
+        assertThrows(UserExistException.class, () -> userService.register(registerRequest2));
     }
 
 
@@ -67,17 +65,13 @@ public class UserServiceTests {
     public void negativeLoginTest() throws UserExistException, BadRegisterRequestException {
         LoginRequest loginRequest = new LoginRequest("Micah", "hello");
 
-        assertThrows(UserNotFoundException.class, () -> {
-            userService.login(loginRequest);
-        });
+        assertThrows(UserNotFoundException.class, () -> userService.login(loginRequest));
 
         RegisterRequest registerRequest = new RegisterRequest("Geoff", "password", "Geoff@email.com");
         userService.register(registerRequest);
         LoginRequest loginRequest2 = new LoginRequest("Geoff", "passwords");
 
-        assertThrows(WrongPasswordException.class, () -> {
-            userService.login(loginRequest2);
-        });
+        assertThrows(WrongPasswordException.class, () -> userService.login(loginRequest2));
     }
 
     @Test
@@ -108,9 +102,7 @@ public class UserServiceTests {
         userService.logout(logoutRequest);
 
         LogoutRequest logoutRequest2 = new LogoutRequest(authToken);
-        assertThrows(AuthTokenNotFoundException.class, () -> {
-            userService.logout(logoutRequest2);
-        });
+        assertThrows(AuthTokenNotFoundException.class, () -> userService.logout(logoutRequest2));
     }
 
 }

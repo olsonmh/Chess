@@ -54,9 +54,7 @@ public class GameServiceTests {
         String authToken = Service.generateToken();
         CreateGameRequest createGameRequest = new CreateGameRequest(authToken, "myGame");
 
-        assertThrows(AuthTokenNotFoundException.class, () -> {
-            gameService.createGame(createGameRequest);
-        });
+        assertThrows(AuthTokenNotFoundException.class, () -> gameService.createGame(createGameRequest));
     }
 
         @Test
@@ -106,9 +104,7 @@ public class GameServiceTests {
         String authToken = registerResult.authToken();
         JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, "WHITE", 123456);
 
-        assertThrows(GameNotFoundException.class, () -> {
-            gameService.joinGame(joinGameRequest);
-        });
+        assertThrows(GameNotFoundException.class, () -> gameService.joinGame(joinGameRequest));
 
         CreateGameRequest createGameRequest = new CreateGameRequest(registerResult.authToken(), "NewGame");
         CreateGameResult createGameResult = gameService.createGame(createGameRequest);
@@ -119,9 +115,7 @@ public class GameServiceTests {
         LogoutRequest logoutRequest = new LogoutRequest(joinGameRequest2.authToken());
         userService.logout(logoutRequest);
 
-        assertThrows(AuthTokenNotFoundException.class, () -> {
-            gameService.joinGame(joinGameRequest2);
-        });
+        assertThrows(AuthTokenNotFoundException.class, () -> gameService.joinGame(joinGameRequest2));
 
         LoginRequest loginRequest = new LoginRequest("Micah", "password");
         LoginResult loginResult = userService.login(loginRequest);
@@ -134,9 +128,7 @@ public class GameServiceTests {
         String authTokenPlayerTwo = registerResult2.authToken();
         JoinGameRequest joinGameRequest4 = new JoinGameRequest(authTokenPlayerTwo, "WHITE", gameID);
 
-        assertThrows(PlayerAlreadyTakenException.class, () -> {
-            gameService.joinGame(joinGameRequest4);
-        });
+        assertThrows(PlayerAlreadyTakenException.class, () -> gameService.joinGame(joinGameRequest4));
     }
 
     @Test
@@ -185,8 +177,6 @@ public class GameServiceTests {
         userService.logout(logoutRequest);
 
         ListGamesRequest listGamesRequest = new ListGamesRequest(registerResult.authToken());
-        assertThrows(AuthTokenNotFoundException.class, () -> {
-            gameService.listGames(listGamesRequest);
-        });
+        assertThrows(AuthTokenNotFoundException.class, () -> gameService.listGames(listGamesRequest));
     }
 }
