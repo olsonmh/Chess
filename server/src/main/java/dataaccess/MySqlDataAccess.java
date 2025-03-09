@@ -1,6 +1,9 @@
 package dataaccess;
 
 import com.google.gson.Gson;
+import model.AuthData;
+import model.GameData;
+import model.GameDataForListing;
 import model.UserData;
 
 import java.util.ArrayList;
@@ -17,14 +20,57 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         configureDatabase();
     }
 
+    @Override
+    public UserData getUser(String username){
+        throw new RuntimeException();
+    }
 
+    @Override
+    public void clearUserData(){
+    }
 
+    @Override
     public void createUser(UserData user){
         var statement = "INSERT INTO pet (name, type, json) VALUES (?, ?, ?)";
         var json = new Gson().toJson(pet);
         var id = executeUpdate(statement, pet.name(), pet.type(), json);
         return new Pet(id, pet.name(), pet.type());
     }
+
+    @Override
+    public void createGame(GameData gameData){}
+
+    @Override
+    public GameData getGame(int gameID){
+        throw new RuntimeException();
+    }
+
+    @Override
+    public Collection<GameDataForListing> listGames(){
+        throw new RuntimeException();
+    }
+
+    @Override
+    public void updateGame(GameData gameData){}
+
+    @Override
+    public void clearGames(){}
+
+    @Override
+    public void createAuth(AuthData authdata){}
+
+    @Override
+    public AuthData getAuth(String authToken) {
+        return null;
+    }
+
+    @Override
+    public void deleteAuth(String authToken){}
+
+    @Override
+    public void clearAuthTokens(){}
+
+
 
     private int executeUpdate(String statement, Object... params) throws ResponseException {
         try (var conn = DatabaseManager.getConnection()) {
