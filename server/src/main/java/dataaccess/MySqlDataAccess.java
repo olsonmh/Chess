@@ -14,6 +14,8 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
 
+
+
 public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
 
     public MySqlDataAccess(){
@@ -22,6 +24,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
 
     @Override
     public UserData getUser(String username){
+        var statement = "SELECT id, json FROM pet WHERE id=?";
         throw new RuntimeException();
     }
 
@@ -31,10 +34,13 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
 
     @Override
     public void createUser(UserData user){
-        var statement = "INSERT INTO pet (name, type, json) VALUES (?, ?, ?)";
-        var json = new Gson().toJson(pet);
-        var id = executeUpdate(statement, pet.name(), pet.type(), json);
-        return new Pet(id, pet.name(), pet.type());
+        String statement = "INSERT INTO user (name, passHash, email) VALUES (?, ?, ?)";
+        String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());
+        executeUpdate(statement, user.username(), hashedPassword, user.email());
+        //var statement = "INSERT INTO pet (name, type, json) VALUES (?, ?, ?)";
+        //var json = new Gson().toJson(pet);
+        //var id = executeUpdate(statement, pet.name(), pet.type(), json);
+        //return new Pet(id, pet.name(), pet.type());
     }
 
     @Override
