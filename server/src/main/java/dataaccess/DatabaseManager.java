@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.Properties;
 
 public class DatabaseManager {
-    private static final String DATABASE_NAME;
+    private static String DATABASE_NAME;
     private static final String USER;
     private static final String PASSWORD;
     private static final String CONNECTION_URL;
@@ -33,9 +33,15 @@ public class DatabaseManager {
         }
     }
 
+    public static String setDatabaseName(String dbname){
+        String old = DATABASE_NAME;
+        DATABASE_NAME = dbname;
+        return old;
+    }
     /**
      * Creates the database if it does not already exist.
      */
+
     static void createDatabase() throws DataAccessException {
         try {
             var statement = "CREATE DATABASE IF NOT EXISTS " + DATABASE_NAME;

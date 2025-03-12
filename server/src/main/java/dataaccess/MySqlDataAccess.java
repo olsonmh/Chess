@@ -7,13 +7,9 @@ import model.GameData;
 import model.GameDataForListing;
 import model.UserData;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.sql.*;
 import java.util.HashSet;
-
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -29,6 +25,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         String statement = "SELECT name, passHash, email FROM user WHERE name = '%s';".formatted(username);
         try {
             ResultSet results = executeQuery(statement);
+            results.next();
             return new UserData(results.getString(0), results.getString(1), results.getString(2));
         } catch (SQLException e) {
             throw new RuntimeException();
@@ -61,6 +58,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         String statement = "SELECT id, whiteUser, blackUser, name, state FROM game WHERE id = %d;".formatted(gameID);
         try {
             ResultSet results = executeQuery(statement);
+            results.next();
             return new GameData(results.getInt(0),
                                 results.getString(1),
                                 results.getString(2),
@@ -113,6 +111,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         String statement = "SELECT token, user FROM auth WHERE token = '%s';".formatted(authToken);
         ResultSet results = executeQuery(statement);
         try {
+            results.next();
             return new AuthData(results.getString(0), results.getString(1));
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -130,8 +129,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
 
     }
 
-
-    private ResultSet executeQuery(String statement) {
+    public ResultSet executeQuery(String statement) {
         try {
             var connection = DatabaseManager.getConnection();
             var prepareStatement = connection.prepareStatement(statement);
@@ -141,7 +139,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         }
     }
 
-    private void executeStatement(String statement) {
+    public void executeStatement(String statement) {
         try {
             var connection = DatabaseManager.getConnection();
             var prepareStatement = connection.prepareStatement(statement);
@@ -151,39 +149,17 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         }
     }
 
-    private int executeUpdate(String statement, Object... params) {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                for (var i = 0; i < params.length; i++) {
-                    var param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    //else if (param instanceof PetType p) ps.setString(i + 1, p.toString());
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-
-                var rs = ps.getGeneratedKeys();
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-
-                return 0;
-            }
-        } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException();//ResponseException(500, String.format("unable to update database: %s, %s", statement, e.getMessage()))
-        }
-    }
-
-    private final String[] createStatements = {
+    private static final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  user (
               name varchar(32) NOT NULL PRIMARY KEY,
               passHash varchar(256) NOT NULL,
               email varchar(256) DEFAULT NULL
             );
+            """,
+            """
             CREATE TABLE IF NOT EXISTS game (
-              id int NOT NULL  PRIMARY KEY,
+              id int NOT NULL PRIMARY KEY,
               whiteUser varchar(32) DEFAULT NULL,
               blackUser varchar(32) DEFAULT NULL,
               name varchar(256) NOT NULL,
@@ -191,6 +167,8 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
               FOREIGN KEY (whiteUser) REFERENCES user(name),
               FOREIGN KEY (blackUser) REFERENCES user(name)
             );
+            """,
+            """
             CREATE TABLE IF NOT EXISTS auth (
               token varchar(64) NOT NULL PRIMARY KEY,
               user varchar(32) NOT NULL,
@@ -199,8 +177,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
             """
     };
 
-
-    private void configureDatabase(){
+    public static void configureDatabase(){
         try{
             DatabaseManager.createDatabase();
             var connection = DatabaseManager.getConnection();
@@ -212,17 +189,5 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
             throw new RuntimeException(e);
         }
     }
-    /**
-    private void configureDatabase(){
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new ResponseException(500, String.format("Unable to configure database: %s", ex.getMessage()));
-        }
-    }**/
+
 }
