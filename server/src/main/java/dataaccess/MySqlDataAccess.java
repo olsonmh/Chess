@@ -11,11 +11,7 @@ import java.util.Collection;
 import java.sql.*;
 import java.util.HashSet;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.mindrot.jbcrypt.BCrypt;
-import service.Service;
-import service.UserService;
 
 
 public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
@@ -173,7 +169,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         }
     }
 
-    private static final String[] createStatements = {
+    private static final String[] CreateStatements = {
             """
             CREATE TABLE IF NOT EXISTS  user (
               name varchar(32) NOT NULL PRIMARY KEY,
@@ -205,7 +201,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         try{
             DatabaseManager.createDatabase();
             var connection = DatabaseManager.getConnection();
-            for(var statement : createStatements){
+            for(var statement : CreateStatements){
                 var preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.executeUpdate();
             }
