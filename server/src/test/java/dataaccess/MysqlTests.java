@@ -100,7 +100,7 @@ public class MysqlTests {
 
         assert(dao.getUser("micah") == null);
 
-        assertDoesNotThrow(() -> {dao.createUser(user);});
+        assertDoesNotThrow(() -> dao.createUser(user));
         UserData userData = dao.getUser("micah");
         assert !Objects.equals(userData.password(), user.password());
     }
@@ -113,9 +113,9 @@ public class MysqlTests {
         UserData user2 = new UserData("dad", "mypasswordsucks", "oldman@livessad.com");
         UserData user3 = new UserData("hello", "mypasswordsucks", "oldman@livessad.com");
 
-        assertDoesNotThrow(() -> {dao.createUser(user);});
-        assertDoesNotThrow(() -> {dao.createUser(user2);});
-        assertDoesNotThrow(() -> {dao.createUser(user3);});
+        assertDoesNotThrow(() -> dao.createUser(user));
+        assertDoesNotThrow(() -> dao.createUser(user2));
+        assertDoesNotThrow(() -> dao.createUser(user3));
 
         assertDoesNotThrow(dao::clearUserData);
 
@@ -130,7 +130,7 @@ public class MysqlTests {
         MySqlDataAccess dao = new MySqlDataAccess();
         GameData game = new GameData(123456, null, null,"myGame", new ChessGame());
 
-        assertDoesNotThrow(() -> {dao.createGame(game);});
+        assertDoesNotThrow(() -> dao.createGame(game));
 
         String statement = "SELECT id, whiteUser, blackUser, name, state FROM game WHERE id = 123456;";
         try {
@@ -163,7 +163,7 @@ public class MysqlTests {
         MySqlDataAccess dao = new MySqlDataAccess();
         GameData game = new GameData(123456, null, null,"myGame", new ChessGame());
 
-        assertDoesNotThrow(() -> {dao.createGame(game);});
+        assertDoesNotThrow(() -> dao.createGame(game));
         try{
             GameData gameData = dao.getGame(123456);
             assert(gameData.gameName().equals("myGame"));
@@ -182,7 +182,7 @@ public class MysqlTests {
         MySqlDataAccess dao = new MySqlDataAccess();
         GameData game = new GameData(123456, null, null,"myGame", new ChessGame());
 
-        assertDoesNotThrow(() -> {dao.createGame(game);});
+        assertDoesNotThrow(() -> dao.createGame(game));
         assert(dao.getGame(12346) == null);
     }
 
@@ -193,8 +193,8 @@ public class MysqlTests {
         GameData game = new GameData(123456, null, null,"myGame", new ChessGame());
         GameData game2 = new GameData(121236, null, null,"CoolGame", new ChessGame());
 
-        assertDoesNotThrow(() -> {dao.createGame(game);});
-        assertDoesNotThrow(() -> {dao.createGame(game2);});
+        assertDoesNotThrow(() -> dao.createGame(game));
+        assertDoesNotThrow(() -> dao.createGame(game2));
 
         try{
             Collection<GameDataForListing> listGames = dao.listGames();
@@ -214,9 +214,9 @@ public class MysqlTests {
         GameData game2 = new GameData(121236, null, null,"NewGame", new ChessGame());
         GameData game3 = new GameData(123111, null, null,"NewGame", new ChessGame());
 
-        assertDoesNotThrow(() -> {dao.createGame(game);});
-        assertDoesNotThrow(() -> {dao.createGame(game2);});
-        assertDoesNotThrow(() -> {dao.createGame(game3);});
+        assertDoesNotThrow(() -> dao.createGame(game));
+        assertDoesNotThrow(() -> dao.createGame(game2));
+        assertDoesNotThrow(() -> dao.createGame(game3));
 
         try{
             Collection<GameDataForListing> listGames = dao.listGames();
@@ -236,8 +236,8 @@ public class MysqlTests {
         GameData updatedGame = new GameData(123456, "Micah", null,"myGame", new ChessGame());
         UserData user = new UserData("Micah", "saooda3", "choom@hello.org");
 
-        assertDoesNotThrow(() -> {dao.createGame(game);});
-        assertDoesNotThrow(() -> {dao.createUser(user);});
+        assertDoesNotThrow(() -> dao.createGame(game));
+        assertDoesNotThrow(() -> dao.createUser(user));
 
         try{
             dao.updateGame(updatedGame);
@@ -257,7 +257,7 @@ public class MysqlTests {
         GameData game = new GameData(123456, null, null,"myGame", new ChessGame());
         GameData updatedGame = new GameData(123456, "Micah", null,"myGame", new ChessGame());
 
-        assertDoesNotThrow(() -> {dao.createGame(game);});
+        assertDoesNotThrow(() -> dao.createGame(game));
         assertThrows(Exception.class, () -> dao.updateGame(updatedGame));
     }
 
@@ -269,9 +269,9 @@ public class MysqlTests {
         GameData game2 = new GameData(123457, null,null,"myGame2", new ChessGame());
         GameData game3 = new GameData(123458, null,null,"myGame3", new ChessGame());
 
-        assertDoesNotThrow(() -> {dao.createGame(game);});
-        assertDoesNotThrow(() -> {dao.createGame(game2);});
-        assertDoesNotThrow(() -> {dao.createGame(game3);});
+        assertDoesNotThrow(() -> dao.createGame(game));
+        assertDoesNotThrow(() -> dao.createGame(game2));
+        assertDoesNotThrow(() -> dao.createGame(game3));
         assertDoesNotThrow(dao::clearGames);
 
         assert(dao.getGame(123456) == null);
@@ -288,10 +288,10 @@ public class MysqlTests {
         AuthData auth = new AuthData(Service.generateToken(), "micah");
         AuthData auth2 = new AuthData(Service.generateToken(), "charles");
 
-        assertDoesNotThrow(() -> {dao.createUser(user);});
-        assertDoesNotThrow(() -> {dao.createUser(user2);});
-        assertDoesNotThrow(() -> {dao.createAuth(auth);});
-        assertDoesNotThrow(() -> {dao.createAuth(auth2);});
+        assertDoesNotThrow(() -> dao.createUser(user));
+        assertDoesNotThrow(() -> dao.createUser(user2));
+        assertDoesNotThrow(() -> dao.createAuth(auth));
+        assertDoesNotThrow(() -> dao.createAuth(auth2));
     }
 
     @Test
@@ -367,8 +367,8 @@ public class MysqlTests {
         AuthData auth = new AuthData(Service.generateToken(), "Micah");
         AuthData auth2 = new AuthData(Service.generateToken(), "Greg");
 
-        assertDoesNotThrow(() -> {dao.deleteAuth(auth.authToken());});
-        assertDoesNotThrow(() -> {dao.deleteAuth(auth2.authToken());});
+        assertDoesNotThrow(() -> dao.deleteAuth(auth.authToken()));
+        assertDoesNotThrow(() -> dao.deleteAuth(auth2.authToken()));
     }
 
     @Test
@@ -422,7 +422,7 @@ public class MysqlTests {
         UserData user = new UserData("Master", "password", "choom@hello.org");
         dao.createUser(user);
         String statement = "DELETE FROM user;";
-        assertDoesNotThrow(() -> {dao.executeStatement(statement);});
+        assertDoesNotThrow(() -> dao.executeStatement(statement));
     }
 
     @Test
