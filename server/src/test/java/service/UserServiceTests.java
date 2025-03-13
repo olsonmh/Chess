@@ -1,6 +1,9 @@
 package service;
 
+import dataaccess.DatabaseManager;
+import dataaccess.MySqlDataAccess;
 import model.*;
+import org.mindrot.jbcrypt.BCrypt;
 import service.exceptions.*;
 import service.objects.*;
 
@@ -13,12 +16,15 @@ public class UserServiceTests {
 
     @BeforeEach
     public void setup() {
+        Service.userData.testSetup();
         userService = new UserService();
     }
 
+
     @AfterEach
     public void remove(){
-        Service.userData.clearUserData();
+        //Service.userData.clearUserData(); need with memDAO
+        Service.userData.testRemove();
     }
 
     @Test
@@ -28,11 +34,10 @@ public class UserServiceTests {
         RegisterResult registerResult = userService.register(registerRequest);
         assert Objects.equals(registerResult.username(), "Micah");
         assert registerResult.authToken() != null;
-
         UserData user = Service.userData.getUser("Micah");
 
         assert Objects.equals(user.username(), "Micah");
-        assert Objects.equals(user.password(), "hello");
+        assert(BCrypt.checkpw("hello", user.password()));
         assert Objects.equals(user.email(), "micah@email.com");
     }
 

@@ -11,7 +11,11 @@ import java.util.Collection;
 import java.sql.*;
 import java.util.HashSet;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mindrot.jbcrypt.BCrypt;
+import service.Service;
+import service.UserService;
 
 
 public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
@@ -25,8 +29,10 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         String statement = "SELECT name, passHash, email FROM user WHERE name = '%s';".formatted(username);
         try {
             ResultSet results = executeQuery(statement);
-            results.next();
-            return new UserData(results.getString(0), results.getString(1), results.getString(2));
+            if(!results.next()){
+                return null;
+            }
+            return new UserData(results.getString("name"), results.getString("passHash"), results.getString("email"));
         } catch (SQLException e) {
             throw new RuntimeException();
         }
@@ -48,8 +54,12 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
     @Override
     public void createGame(GameData gameData){
         String json = new Gson().toJson(gameData.game());
-        String statement = "INSERT INTO game (id, whiteUser, blackUser, name, state) VALUES (%d,'%s','%s','%s','%s');"
-                .formatted(gameData.gameID(), gameData.whiteUsername(),gameData.blackUsername(),gameData.gameName(), json);
+        if(gameData.gameName() == null){
+            throw new RuntimeException();
+        }
+
+        String statement = "INSERT INTO game (id, whiteUser, blackUser, name, state) VALUES (%d,null,null,'%s','%s');"
+                .formatted(gameData.gameID(),gameData.gameName().replaceAll("'", "\\\\'"), json);
         executeStatement(statement);
     }
 
@@ -58,12 +68,14 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         String statement = "SELECT id, whiteUser, blackUser, name, state FROM game WHERE id = %d;".formatted(gameID);
         try {
             ResultSet results = executeQuery(statement);
-            results.next();
-            return new GameData(results.getInt(0),
-                                results.getString(1),
-                                results.getString(2),
-                                results.getString(3),
-                                new Gson().fromJson(results.getString(4), ChessGame.class));
+            if(!results.next()){
+                return null;
+            }
+            return new GameData(results.getInt("id"),
+                                results.getString("whiteUser"),
+                                results.getString("blackUser"),
+                                results.getString("name"),
+                                new Gson().fromJson(results.getString("state"), ChessGame.class));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -76,10 +88,10 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         try{
             ResultSet results = executeQuery(statement);
             while(results.next()){
-                listOfGames.add(new GameDataForListing(results.getInt(0),
-                                                       results.getString(1),
-                                                       results.getString(2),
-                                                       results.getString(3)));
+                listOfGames.add(new GameDataForListing(results.getInt("id"),
+                                                       results.getString("whiteUser"),
+                                                       results.getString("blackUser"),
+                                                       results.getString("name")));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -91,6 +103,16 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
     public void updateGame(GameData gameData){
         String jsonState = new Gson().toJson(gameData.game());
         String statement = "UPDATE game SET state = '%s' WHERE id = %d;".formatted(jsonState, gameData.gameID());
+        if(gameData.whiteUsername() != null){
+            String statement2 = "UPDATE game SET whiteUser = '%s' WHERE id = %d;"
+                                .formatted(gameData.whiteUsername(), gameData.gameID());
+            executeStatement(statement2);
+        }
+        if(gameData.blackUsername() != null){
+            String statement3 = "UPDATE game SET blackUser = '%s' WHERE id = %d;"
+                                .formatted(gameData.blackUsername(), gameData.gameID());
+            executeStatement(statement3);
+        }
         executeStatement(statement);
     }
 
@@ -111,8 +133,10 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         String statement = "SELECT token, user FROM auth WHERE token = '%s';".formatted(authToken);
         ResultSet results = executeQuery(statement);
         try {
-            results.next();
-            return new AuthData(results.getString(0), results.getString(1));
+            if(!results.next()){
+                return null;
+            }
+            return new AuthData(results.getString("token"), results.getString("user"));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -188,6 +212,24 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String oldDbName;
+
+    public void testSetup() {
+        oldDbName = DatabaseManager.setDatabaseName("test");
+        MySqlDataAccess.configureDatabase();
+    }
+
+    public void testRemove(){
+        try {
+            var connection = DatabaseManager.getConnection();
+            var preparedStatement = connection.prepareStatement("drop database test");
+            preparedStatement.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        DatabaseManager.setDatabaseName(oldDbName);
     }
 
 }

@@ -9,4 +9,8 @@ public interface AuthDAO {
     void deleteAuth(String authToken);
 
     void clearAuthTokens();
+
+    void testSetup();
+
+    void testRemove();
 }

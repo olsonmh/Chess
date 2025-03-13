@@ -15,4 +15,8 @@ public interface GameDAO {
     void updateGame(GameData gameData);
 
     void clearGames();
+
+    void testSetup();
+
+    void testRemove();
 }

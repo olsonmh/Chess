@@ -56,8 +56,8 @@ public class MysqlTests {
         UserData user = new UserData("micah", "saooda3", "choom@hello.org");
         UserData user2 = new UserData("dad", "mypasswordsucks", "oldman@livessad.com");
 
-        assertDoesNotThrow(() -> {dao.createUser(user);});
-        assertDoesNotThrow(() -> {dao.createUser(user2);});
+        assertDoesNotThrow(() -> dao.createUser(user));
+        assertDoesNotThrow(() -> dao.createUser(user2));
 
         String statement = "SELECT name, passHash, email FROM user WHERE name = '%s';".formatted("micah");
         try {
@@ -75,7 +75,7 @@ public class MysqlTests {
     public void negativeCreateUserTest() {
         MySqlDataAccess dao = new MySqlDataAccess();
         UserData user = new UserData("micah", "choom", "choom@hello.org");
-        assertDoesNotThrow(() -> {dao.createUser(user);});
+        assertDoesNotThrow(() -> dao.createUser(user));
         assertThrows(Exception.class, () -> dao.createUser(user));
     }
 
@@ -85,7 +85,7 @@ public class MysqlTests {
         MySqlDataAccess dao = new MySqlDataAccess();
         UserData user = new UserData("micah", "saooda3", "choom@hello.org");
 
-        assertDoesNotThrow(() -> {dao.createUser(user);});
+        assertDoesNotThrow(() -> dao.createUser(user));
         UserData userData = dao.getUser("micah");
 
         assert(userData.username().equals("micah"));
@@ -98,7 +98,7 @@ public class MysqlTests {
         MySqlDataAccess dao = new MySqlDataAccess();
         UserData user = new UserData("micah", "saooda3", "choom@hello.org");
 
-        assertThrows(Exception.class, () -> dao.getUser("micah"));
+        assert(dao.getUser("micah") == null);
 
         assertDoesNotThrow(() -> {dao.createUser(user);});
         UserData userData = dao.getUser("micah");
@@ -119,9 +119,9 @@ public class MysqlTests {
 
         assertDoesNotThrow(dao::clearUserData);
 
-        assertThrows(Exception.class, () -> dao.getUser("micah"));
-        assertThrows(Exception.class, () -> dao.getUser("dad"));
-        assertThrows(Exception.class, () -> dao.getUser("hello"));
+        assert(dao.getUser("micah") == null);
+        assert(dao.getUser("dad") == null);
+        assert(dao.getUser("hello") == null);
     }
 
     @Test
@@ -183,7 +183,7 @@ public class MysqlTests {
         GameData game = new GameData(123456, null, null,"myGame", new ChessGame());
 
         assertDoesNotThrow(() -> {dao.createGame(game);});
-        assertThrows(Exception.class, () -> dao.getGame(12346));
+        assert(dao.getGame(12346) == null);
     }
 
     @Test
@@ -274,9 +274,9 @@ public class MysqlTests {
         assertDoesNotThrow(() -> {dao.createGame(game3);});
         assertDoesNotThrow(dao::clearGames);
 
-        assertThrows(Exception.class, () -> dao.getGame(123456));
-        assertThrows(Exception.class, () -> dao.getGame(123457));
-        assertThrows(Exception.class, () -> dao.getGame(123458));
+        assert(dao.getGame(123456) == null);
+        assert(dao.getGame(123457) == null);
+        assert(dao.getGame(123458) == null);
     }
 
     @Test
@@ -335,8 +335,8 @@ public class MysqlTests {
         AuthData auth = new AuthData(Service.generateToken(), "Micah");
         AuthData auth2 = new AuthData(Service.generateToken(), "Greg");
 
-        assertThrows(Exception.class, () -> dao.getAuth(auth.authToken()));
-        assertThrows(Exception.class, () -> dao.getAuth(auth2.authToken()));
+        assert(dao.getAuth(auth.authToken()) == null);
+        assert(dao.getAuth(auth2.authToken()) == null);
     }
 
     @Test
@@ -356,8 +356,8 @@ public class MysqlTests {
         dao.deleteAuth(auth.authToken());
         dao.deleteAuth(auth2.authToken());
 
-        assertThrows(Exception.class, () -> dao.getAuth(auth.authToken()));
-        assertThrows(Exception.class, () -> dao.getAuth(auth2.authToken()));
+        assert(dao.getAuth(auth.authToken()) == null);
+        assert(dao.getAuth(auth2.authToken()) == null);
     }
 
     @Test
@@ -390,9 +390,9 @@ public class MysqlTests {
         dao.createAuth(auth3);
 
         assertDoesNotThrow(dao::clearAuthTokens);
-        assertThrows(Exception.class, () -> dao.getAuth(auth.authToken()));
-        assertThrows(Exception.class, () -> dao.getAuth(auth2.authToken()));
-        assertThrows(Exception.class, () -> dao.getAuth(auth3.authToken()));
+        assert(dao.getAuth(auth.authToken()) == null);
+        assert(dao.getAuth(auth2.authToken()) == null);
+        assert(dao.getAuth(auth3.authToken()) == null);
     }
 
     @Test

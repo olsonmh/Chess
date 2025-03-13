@@ -9,6 +9,9 @@ public interface UserDAO {
 
     void clearUserData();
 
+    void testSetup();
+
+    void testRemove();
 }
 
 

@@ -13,9 +13,15 @@ public class ClearServiceTest {
 
     @BeforeEach
     public void setup() {
+        Service.userData.testSetup();
         gameService = new GameService();
         userService = new UserService();
         clearService = new ClearService();
+    }
+
+    @AfterEach
+    public void remove(){
+        Service.userData.testRemove();
     }
 
     @Test

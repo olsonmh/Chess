@@ -1,5 +1,6 @@
 package service;
 
+import org.mindrot.jbcrypt.BCrypt;
 import service.exceptions.*;
 import service.objects.*;
 import model.*;
@@ -32,7 +33,8 @@ public class UserService extends Service{
         if(user == null){
             throw new UserNotFoundException("User not found.");
         }
-        if(!Objects.equals(loginRequest.password(), user.password())){
+
+        if(!BCrypt.checkpw(loginRequest.password(), user.password())){
             throw new WrongPasswordException("Incorrect Password.");
         }
 

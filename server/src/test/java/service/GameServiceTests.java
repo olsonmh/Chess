@@ -16,14 +16,16 @@ public class GameServiceTests {
 
     @BeforeEach
     public void setup() {
+        Service.userData.testSetup();
         gameService = new GameService();
         userService = new UserService();
     }
 
     @AfterEach
     public void remove(){
-        Service.gameData.clearGames();
-        Service.userData.clearUserData();
+        //Service.gameData.clearGames(); memDAO
+        //Service.userData.clearUserData();
+        Service.userData.testRemove();
     }
 
     @Test
