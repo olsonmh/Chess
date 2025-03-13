@@ -27,14 +27,14 @@ public class MysqlTests {
 
     @BeforeEach
     public void setup() {
-        old = DatabaseManager.setDatabaseName("test");
+        old = DatabaseManager.setDatabaseName("chess");
         MySqlDataAccess.configureDatabase();
     }
     @AfterEach
     public void cleanup(){
         try {
             var connection = DatabaseManager.getConnection();
-            var preparedStatement = connection.prepareStatement("drop database test");
+            var preparedStatement = connection.prepareStatement("drop database chess");
             preparedStatement.executeUpdate();
         } catch (Exception e) {
             throw new RuntimeException(e);
