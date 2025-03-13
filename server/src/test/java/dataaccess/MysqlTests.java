@@ -24,17 +24,18 @@ import java.util.Objects;
 
 public class MysqlTests {
     private String old;
+    String dbName = DatabaseManager.getDatabaseName();
 
     @BeforeEach
     public void setup() {
-        old = DatabaseManager.setDatabaseName("chess");
+        old = DatabaseManager.setDatabaseName(dbName);
         MySqlDataAccess.configureDatabase();
     }
     @AfterEach
     public void cleanup(){
         try {
             var connection = DatabaseManager.getConnection();
-            var preparedStatement = connection.prepareStatement("drop database chess");
+            var preparedStatement = connection.prepareStatement("drop database %s".formatted(dbName));
             preparedStatement.executeUpdate();
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -39,6 +39,10 @@ public class DatabaseManager {
         databaseName = dbname;
         return old;
     }
+
+    public static String getDatabaseName(){
+        return databaseName;
+    }
     /**
      * Creates the database if it does not already exist.
      */
