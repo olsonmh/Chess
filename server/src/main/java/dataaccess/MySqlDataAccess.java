@@ -169,7 +169,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         }
     }
 
-    private static final String[] CreateStatements = {
+    private static final String[] CREATE_STATEMENTS = {
             """
             CREATE TABLE IF NOT EXISTS  user (
               name varchar(32) NOT NULL PRIMARY KEY,
@@ -201,7 +201,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
         try{
             DatabaseManager.createDatabase();
             var connection = DatabaseManager.getConnection();
-            for(var statement : CreateStatements){
+            for(var statement : CREATE_STATEMENTS){
                 var preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.executeUpdate();
             }
