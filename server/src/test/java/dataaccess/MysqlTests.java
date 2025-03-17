@@ -24,7 +24,8 @@ import java.util.Objects;
 
 public class MysqlTests {
     private String old;
-    String dbName = DatabaseManager.getDatabaseName();
+    //String dbName = DatabaseManager.getDatabaseName();
+    String dbName = "Test";
 
     @BeforeEach
     public void setup() {
