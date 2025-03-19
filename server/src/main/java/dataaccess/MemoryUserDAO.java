@@ -26,7 +26,7 @@ public class MemoryUserDAO implements UserDAO {
         memoryUserData.clear();
     }
 
-    public void testSetup(){};
+    public void testSetup(){}
 
-    public void testRemove(){};
+    public void testRemove(){}
 }

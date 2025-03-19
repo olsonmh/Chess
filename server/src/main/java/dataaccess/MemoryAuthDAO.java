@@ -31,7 +31,7 @@ public class MemoryAuthDAO implements AuthDAO{
         this.memoryAuthData.clear();
     }
 
-    public void testSetup(){};
+    public void testSetup(){}
 
-    public void testRemove(){};
+    public void testRemove(){}
 }

@@ -48,7 +48,7 @@ public class MemoryGameDAO implements GameDAO{
         this.memoryGameData.clear();
     }
 
-    public void testSetup(){};
+    public void testSetup(){}
 
-    public void testRemove(){};
+    public void testRemove(){}
 }
