@@ -1,3 +1,5 @@
+package serverfacade;
+
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -60,7 +62,7 @@ public class ServerFacade {
     }
 
     public RegisterResult register(String username, String password, String email){
-        RegisterRequest registerRequest = new RegisterRequest(username,password, email);
+        RegisterRequest registerRequest = new RegisterRequest(username, password, email);
 
         try{
             URL url = new URI("http://localhost:8080/user").toURL();
@@ -186,7 +188,7 @@ public class ServerFacade {
         CreateGameRequest createGameRequest = new CreateGameRequest(authToken, gameName);
 
         try{
-            URL url = new URI("http://localhost:8080/user").toURL();
+            URL url = new URI("http://localhost:8080/game").toURL();
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
             con.setRequestMethod("POST");
             con.setRequestProperty("Content-Type", "application/json");
@@ -231,9 +233,9 @@ public class ServerFacade {
         JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, playerColor, gameID);
 
         try{
-            URL url = new URI("http://localhost:8080/user").toURL();
+            URL url = new URI("http://localhost:8080/game").toURL();
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("POST");
+            con.setRequestMethod("PUT");
             con.setRequestProperty("Content-Type", "application/json");
             con.setRequestProperty("Accept", "application/json");
             con.setDoOutput(true);
@@ -316,6 +318,37 @@ public class ServerFacade {
         }
     }
 
-    public void clearAll(){}
+    public String clearAll(){
+        try{
+            URL url = new URI("http://localhost:8080/db").toURL();
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            con.setRequestMethod("DELETE");
+            con.setRequestProperty("Accept", "application/json");
+            //con.addRequestProperty("Authorization", authToken);
+
+
+            int responseCode = con.getResponseCode();
+            if(responseCode != 200){
+                throw new RuntimeException(con.getResponseMessage());
+            }
+
+            try(BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+
+                return response.toString();
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 
 }
