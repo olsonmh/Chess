@@ -2,8 +2,8 @@ package service;
 
 import chess.ChessGame;
 import model.*;
+import model.objects.*;
 import service.exceptions.*;
-import service.objects.*;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;

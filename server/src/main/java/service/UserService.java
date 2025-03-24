@@ -1,11 +1,9 @@
 package service;
 
+import model.objects.*;
 import org.mindrot.jbcrypt.BCrypt;
 import service.exceptions.*;
-import service.objects.*;
 import model.*;
-
-import java.util.Objects;
 
 public class UserService extends Service{
 

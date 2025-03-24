@@ -1,11 +1,9 @@
 package service;
 
-import dataaccess.DatabaseManager;
-import dataaccess.MySqlDataAccess;
 import model.*;
+import model.objects.*;
 import org.mindrot.jbcrypt.BCrypt;
 import service.exceptions.*;
-import service.objects.*;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,4 +1,4 @@
-package service.objects;
+package model.objects;
 import model.GameDataForListing;
 
 import java.util.Collection;

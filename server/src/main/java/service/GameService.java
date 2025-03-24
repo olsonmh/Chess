@@ -1,7 +1,7 @@
 package service;
 
 import chess.ChessGame;
-import service.objects.*;
+import model.objects.*;
 import model.*;
 import service.exceptions.*;
 

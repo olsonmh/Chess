@@ -1,8 +1,10 @@
 package service;
+import model.objects.CreateGameRequest;
+import model.objects.RegisterRequest;
+import model.objects.RegisterResult;
 import service.exceptions.AuthTokenNotFoundException;
 import service.exceptions.BadRegisterRequestException;
 import service.exceptions.UserExistException;
-import service.objects.*;
 
 import org.junit.jupiter.api.*;
 

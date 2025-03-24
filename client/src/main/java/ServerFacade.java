@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -6,10 +5,10 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.Class;
 
 import com.google.gson.Gson;
-import model.*;
-import com.google.gson.Gson;
+import model.objects.*;
 
 public class ServerFacade {
     private final Gson serializer;
@@ -18,7 +17,7 @@ public class ServerFacade {
         this.serializer = new Gson();
     }
 
-    public <Ret,Obj> Ret poop(Obj obj, String endpoint, String method){
+    public <Ret,Obj> Ret doRequest(Obj obj, String endpoint, String method, Class<Ret> classType){
         try{
             URL url = new URI("http://localhost:8080/" + endpoint).toURL();
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
@@ -49,8 +48,7 @@ public class ServerFacade {
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
                 }
-
-                return serializer.fromJson(response.toString(),Ret.class);
+                return serializer.fromJson(response.toString(), classType);
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -61,7 +59,9 @@ public class ServerFacade {
         }
     }
 
-    public AuthData register(String username, String password, String email){
+    public RegisterResult register(String username, String password, String email){
+        RegisterRequest registerRequest = new RegisterRequest(username,password, email);
+
         try{
             URL url = new URI("http://localhost:8080/user").toURL();
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
@@ -70,8 +70,7 @@ public class ServerFacade {
             con.setRequestProperty("Accept", "application/json");
             con.setDoOutput(true);
 
-            UserData user = new UserData(username,password, email);
-            String json = serializer.toJson(user);
+            String json = serializer.toJson(registerRequest);
 
             try(OutputStream outputStream = con.getOutputStream()) {
                 byte[] input = json.getBytes(StandardCharsets.UTF_8);
@@ -93,7 +92,7 @@ public class ServerFacade {
                     response.append(responseLine.trim());
                 }
 
-                return serializer.fromJson(response.toString(),AuthData.class);
+                return serializer.fromJson(response.toString(),RegisterResult.class);
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -104,17 +103,174 @@ public class ServerFacade {
         }
     }
 
-    public void login(){
+    public LoginResult login(String username, String password){
+        LoginRequest loginRequest = new LoginRequest(username,password);
+
+        try{
+            URL url = new URI("http://localhost:8080/session").toURL();
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Accept", "application/json");
+            con.setDoOutput(true);
+            //con.addRequestProperty("Authorization", authToken);
+
+            String json = serializer.toJson(loginRequest);
+
+            try(OutputStream outputStream = con.getOutputStream()) {
+                byte[] input = json.getBytes(StandardCharsets.UTF_8);
+                outputStream.write(input, 0, input.length);
+            } catch (Exception e){
+                throw new RuntimeException();
+            }
+
+            int responseCode = con.getResponseCode();
+            if(responseCode != 200){
+                throw new RuntimeException(con.getResponseMessage());
+            }
+
+            try(BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+
+                return serializer.fromJson(response.toString(),LoginResult.class);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
 
     }
 
-    public void logout(){}
+    public String logout(String authToken){
+        try{
+            URL url = new URI("http://localhost:8080/session").toURL();
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            con.setRequestMethod("DELETE");
+            con.setRequestProperty("Accept", "application/json");
+            con.addRequestProperty("Authorization", authToken);
 
-    public void createGame(){}
+
+            int responseCode = con.getResponseCode();
+            if(responseCode != 200){
+                throw new RuntimeException(con.getResponseMessage());
+            }
+
+            try(BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+
+                return response.toString();
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void createGame(){
+        RegisterRequest registerRequest = new RegisterRequest(username,password, email);
+
+        try{
+            URL url = new URI("http://localhost:8080/user").toURL();
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Accept", "application/json");
+            con.setDoOutput(true);
+
+            String json = serializer.toJson(registerRequest);
+
+            try(OutputStream outputStream = con.getOutputStream()) {
+                byte[] input = json.getBytes(StandardCharsets.UTF_8);
+                outputStream.write(input, 0, input.length);
+            } catch (Exception e){
+                throw new RuntimeException();
+            }
+
+            int responseCode = con.getResponseCode();
+            if(responseCode != 200){
+                throw new RuntimeException(con.getResponseMessage());
+            }
+
+            try(BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+
+                return serializer.fromJson(response.toString(),RegisterResult.class);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 
     public void joinGame(){}
 
-    public void listGames(){}
+    public ListGamesResult listGames(String authToken){
+
+        try{
+            URL url = new URI("http://localhost:8080/game").toURL();
+            HttpURLConnection con = (HttpURLConnection)url.openConnection();
+            con.setRequestMethod("GET");
+            //con.setRequestProperty("Content-Type", "application/json");
+            con.setRequestProperty("Accept", "application/json");
+            //con.setDoOutput(true);
+            con.addRequestProperty("Authorization", authToken);
+
+            //String json = serializer.toJson(loginRequest);
+
+            /*try(OutputStream outputStream = con.getOutputStream()) {
+                byte[] input = json.getBytes(StandardCharsets.UTF_8);
+                outputStream.write(input, 0, input.length);
+            } catch (Exception e){
+                throw new RuntimeException();
+            }*/
+
+            int responseCode = con.getResponseCode();
+            if(responseCode != 200){
+                throw new RuntimeException(con.getResponseMessage());
+            }
+
+            try(BufferedReader br = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
+                StringBuilder response = new StringBuilder();
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+
+                return serializer.fromJson(response.toString(),ListGamesResult.class);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
 
     public void clearAll(){}
 
