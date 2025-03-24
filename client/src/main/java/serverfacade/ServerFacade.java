@@ -318,7 +318,7 @@ public class ServerFacade {
         }
     }
 
-    public String clearAll(){
+    public static String clearAll(){
         try{
             URL url = new URI("http://localhost:8080/db").toURL();
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
