@@ -9,6 +9,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.Class;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.objects.*;
 
@@ -339,5 +341,4 @@ public class ServerFacade {
             throw new RuntimeException(e.getMessage());
         }
     }
-
 }

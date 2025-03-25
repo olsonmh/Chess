@@ -9,12 +9,15 @@ import ui.EscapeSequences;
 
 import model.objects.RegisterResult;
 import serverfacade.ServerFacade;
+import ui.exceptions.FailException;
 import ui.exceptions.QuitException;
 
 public class Main {
     private final static ServerFacade serverFacade = new ServerFacade();
     private static String username;
     private static String authToken;
+    private static ChessGame currentGame = new ChessGame();
+    private static String playerColor;
 
     public static void main(String[] args) {
         System.out.print("Welcome to chess\n");
@@ -59,14 +62,26 @@ public class Main {
             case "quit":
                 throw new QuitException("quitting");
             case "login":
-                LoginResult loginResult = serverFacade.login(tokens[1], tokens[2]);
-                username = loginResult.username();
-                authToken = loginResult.authToken();
+                try {
+                    LoginResult loginResult = serverFacade.login(tokens[1], tokens[2]);
+                    username = loginResult.username();
+                    authToken = loginResult.authToken();
+                } catch (Exception e) {
+                    throw new FailException("Could not login. User may not exist. Try 'help' for commands.\n");
+                }
                 break;
             case "register":
-                RegisterResult result = serverFacade.register(tokens[1], tokens[2], tokens[3]);
-                username = result.username();
-                authToken = result.authToken();
+                try {
+                    RegisterResult result = serverFacade.register(tokens[1], tokens[2], tokens[3]);
+                    username = result.username();
+                    authToken = result.authToken();
+                } catch (Exception e) {
+                    throw new FailException("""
+                            Could not register user. \
+                            User may already exist or something was typed wrong.
+                             Try 'help' for commands.
+                            """);
+                }
                 break;
             case "logout":
             case "create":
@@ -100,8 +115,12 @@ public class Main {
                 username = null;
                 break;
             case "create":
-                CreateGameResult gameResult = serverFacade.createGame(authToken, tokens[1]);
-                System.out.printf("Game %s created with ID: %d\n", tokens[1], gameResult.gameID());
+                try {
+                    CreateGameResult gameResult = serverFacade.createGame(authToken, tokens[1]);
+                    System.out.printf("Game %s created with ID: %d\n", tokens[1], gameResult.gameID());
+                } catch (Exception e) {
+                    throw new FailException("Could not create game. Try 'help' for commands.\n");
+                }
                 break;
             case "list":
                 ListGamesResult listGamesResult = serverFacade.listGames(authToken);
@@ -117,10 +136,17 @@ public class Main {
                 break;
             case "join":
             case "play":
-                serverFacade.joinGame(authToken,tokens[2],Integer.parseInt(tokens[1]));
-                System.out.printf("User %s has joined %d\n", username, Integer.parseInt(tokens[1]));
+                try {
+                    serverFacade.joinGame(authToken, tokens[2], Integer.parseInt(tokens[1]));
+                    playerColor = tokens[2];
+                    System.out.printf("User %s has joined %d\n", username, Integer.parseInt(tokens[1]));
+                } catch (Exception e) {
+                    throw new FailException("Could not join game. Game may not exist.\n");
+                }
+                drawBoard(currentGame, playerColor);
                 break;
             case "observe":
+                drawBoard(currentGame, "WHITE");
                 break;
             case "login":
                 System.out.print("A user is already logged in\n");
@@ -130,6 +156,45 @@ public class Main {
                 break;
             default:
                 System.out.print("You typed something wrong\n");
+        }
+    }
+
+    public static void drawBoard(ChessGame game, String color){
+        String backgroundColor = "";
+        boolean flipBoard = color.equals("WHITE");
+        for(int i = 0; i<=7; i++){
+            for(int j = 0; j<=7; j++){
+                int row = flipBoard ? 7 - i : i;
+                if (flipBoard){
+                    backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
+                } else{
+                    backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_BLACK : EscapeSequences.SET_BG_COLOR_WHITE;
+                }
+                String label;
+                ChessPiece piece = game.getBoard().board[row][j];
+                if(piece == null){
+                    label = "   ";
+                }
+                else{
+                    label = switch (piece.getPieceType()) {
+                        case PAWN -> EscapeSequences.BLACK_PAWN;
+                        case ROOK -> EscapeSequences.BLACK_ROOK;
+                        case KNIGHT -> EscapeSequences.BLACK_KNIGHT;
+                        case QUEEN -> EscapeSequences.BLACK_QUEEN;
+                        case KING -> EscapeSequences.BLACK_KING;
+                        case BISHOP -> EscapeSequences.BLACK_BISHOP;
+                    };
+                    if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+                        label = EscapeSequences.SET_TEXT_COLOR_BLUE + label + EscapeSequences.RESET_TEXT_COLOR;
+                    }
+                    else{
+                        label = EscapeSequences.SET_TEXT_COLOR_RED + label + EscapeSequences.RESET_TEXT_COLOR;
+                    }
+                }
+                System.out.printf("%s%s",backgroundColor, label);
+
+            }
+            System.out.print(EscapeSequences.RESET_BG_COLOR + "\n");
         }
     }
 
