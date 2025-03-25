@@ -67,7 +67,10 @@ public class Main {
                     username = loginResult.username();
                     authToken = loginResult.authToken();
                 } catch (Exception e) {
-                    throw new FailException("Could not login. User may not exist. Try 'help' for commands.\n");
+                    throw new FailException("""
+                                            Could not login. User may not exist.
+                                             Try 'help' for commands.
+                                            """);
                 }
                 break;
             case "register":
@@ -119,7 +122,10 @@ public class Main {
                     CreateGameResult gameResult = serverFacade.createGame(authToken, tokens[1]);
                     System.out.printf("Game %s created with ID: %d\n", tokens[1], gameResult.gameID());
                 } catch (Exception e) {
-                    throw new FailException("Could not create game. Try 'help' for commands.\n");
+                    throw new FailException("""
+                                            Could not create game.
+                                             Try 'help' for commands.
+                                            """);
                 }
                 break;
             case "list":
@@ -160,22 +166,34 @@ public class Main {
     }
 
     public static void drawBoard(ChessGame game, String color){
-        String backgroundColor = "";
+        String backgroundColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
         boolean flipBoard = color.equals("WHITE");
+
+        System.out.printf("%s   ", backgroundColor);
+        if (flipBoard) {
+            for (char ch = 'a'; ch <= 'h'; ch++) {
+                System.out.printf("%s %s ", backgroundColor, ch);
+            }
+        } else{
+            for (char ch = 'h'; ch >= 'a'; ch--) {
+                System.out.printf("%s %s ", backgroundColor, ch);
+            }
+        }
+        System.out.printf("%s   " + EscapeSequences.RESET_BG_COLOR + "\n", backgroundColor);
+
         for(int i = 0; i<=7; i++){
+            int row = flipBoard ? 7 - i : i;
+            System.out.printf("%s %d ", EscapeSequences.SET_BG_COLOR_LIGHT_GREY, row+1);
+
             for(int j = 0; j<=7; j++){
-                int row = flipBoard ? 7 - i : i;
-                if (flipBoard){
-                    backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
-                } else{
-                    backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_BLACK : EscapeSequences.SET_BG_COLOR_WHITE;
-                }
+
+                backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
+
                 String label;
                 ChessPiece piece = game.getBoard().board[row][j];
-                if(piece == null){
+                if (piece == null) {
                     label = "   ";
-                }
-                else{
+                } else {
                     label = switch (piece.getPieceType()) {
                         case PAWN -> EscapeSequences.BLACK_PAWN;
                         case ROOK -> EscapeSequences.BLACK_ROOK;
@@ -184,18 +202,31 @@ public class Main {
                         case KING -> EscapeSequences.BLACK_KING;
                         case BISHOP -> EscapeSequences.BLACK_BISHOP;
                     };
-                    if(piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+                    if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                         label = EscapeSequences.SET_TEXT_COLOR_BLUE + label + EscapeSequences.RESET_TEXT_COLOR;
-                    }
-                    else{
+                    } else {
                         label = EscapeSequences.SET_TEXT_COLOR_RED + label + EscapeSequences.RESET_TEXT_COLOR;
                     }
                 }
-                System.out.printf("%s%s",backgroundColor, label);
-
+                System.out.printf("%s%s", backgroundColor, label);
             }
+            System.out.printf("%s %d ", EscapeSequences.SET_BG_COLOR_LIGHT_GREY, row+1);
             System.out.print(EscapeSequences.RESET_BG_COLOR + "\n");
         }
+
+        backgroundColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+        System.out.printf("%s   ", backgroundColor);
+        if (flipBoard){
+            for (char ch = 'a'; ch <= 'h'; ch++) {
+                System.out.printf("%s %s ", backgroundColor, ch);
+            }
+        } else {
+            for (char ch = 'h'; ch >= 'a'; ch--) {
+                System.out.printf("%s %s ", backgroundColor, ch);
+            }
+        }
+        System.out.printf("%s   " + EscapeSequences.RESET_BG_COLOR + "\n", backgroundColor);
+
     }
 
 }

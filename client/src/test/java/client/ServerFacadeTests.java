@@ -23,13 +23,14 @@ public class ServerFacadeTests {
 
     @BeforeEach
     public void setup() {
-        ServerFacade.clearAll();
+        myServerFacade.clearAll();
     }
 
 
     @AfterAll
     static void stopServer() {
-        ServerFacade.clearAll();
+        ServerFacade myServerFacade = new ServerFacade();
+        myServerFacade.clearAll();
         server.stop();
     }
 
@@ -177,7 +178,7 @@ public class ServerFacadeTests {
     @DisplayName("Positive Clear All Test")
     public void negativeClearAllTest(){
         myServerFacade.register("Greg", "newPass", "greg@email.com");
-        String message = ServerFacade.clearAll();
+        String message = myServerFacade.clearAll();
         assertDoesNotThrow(() -> myServerFacade.register("Greg", "newPass", "greg@email.com"));
         assert(message.equals("{}"));
     }

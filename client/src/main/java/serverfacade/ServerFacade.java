@@ -9,8 +9,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.Class;
 
-import chess.ChessBoard;
-import chess.ChessGame;
 import com.google.gson.Gson;
 import model.objects.*;
 
@@ -21,25 +19,34 @@ public class ServerFacade {
         this.serializer = new Gson();
     }
 
-    public <Ret,Obj> Ret doRequest(Obj obj, String endpoint, String method, Class<Ret> classType){
+    public <Request,Response> Response doRequest(Request req,
+                                                 String endpoint,
+                                                 String method,
+                                                 Class<Response> classType,
+                                                 String authToken){
         try{
             URL url = new URI("http://localhost:8080/" + endpoint).toURL();
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
             con.setRequestMethod(method);
-            con.setRequestProperty("Content-Type", "application/json");
+
             con.setRequestProperty("Accept", "application/json");
-            con.setDoOutput(true);
-
-
-            String json = serializer.toJson(obj);
-
-            try(OutputStream outputStream = con.getOutputStream()) {
-                byte[] input = json.getBytes(StandardCharsets.UTF_8);
-                outputStream.write(input, 0, input.length);
-            } catch (Exception e){
-                throw new RuntimeException();
+            if (authToken != null){
+                con.addRequestProperty("Authorization", authToken);
             }
 
+            if (req != null) {
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setDoOutput(true);
+
+                String json = serializer.toJson(req);
+
+                try (OutputStream outputStream = con.getOutputStream()) {
+                    byte[] input = json.getBytes(StandardCharsets.UTF_8);
+                    outputStream.write(input, 0, input.length);
+                } catch (Exception e) {
+                    throw new RuntimeException();
+                }
+            }
             int responseCode = con.getResponseCode();
             if(responseCode != 200){
                 throw new RuntimeException(con.getResponseMessage());
@@ -51,6 +58,10 @@ public class ServerFacade {
                 String responseLine = null;
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
+                }
+
+                if (classType.equals(String.class)){
+                    return classType.cast(response.toString());
                 }
                 return serializer.fromJson(response.toString(), classType);
 
@@ -65,280 +76,33 @@ public class ServerFacade {
 
     public RegisterResult register(String username, String password, String email){
         RegisterRequest registerRequest = new RegisterRequest(username, password, email);
-
-        try{
-            URL url = new URI("http://localhost:8080/user").toURL();
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Accept", "application/json");
-            con.setDoOutput(true);
-
-            String json = serializer.toJson(registerRequest);
-
-            try(OutputStream outputStream = con.getOutputStream()) {
-                byte[] input = json.getBytes(StandardCharsets.UTF_8);
-                outputStream.write(input, 0, input.length);
-            } catch (Exception e){
-                throw new RuntimeException();
-            }
-
-            int responseCode = con.getResponseCode();
-            if(responseCode != 200){
-                throw new RuntimeException(con.getResponseMessage());
-            }
-
-            try(BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-
-                return serializer.fromJson(response.toString(),RegisterResult.class);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
-            }
-
-        } catch (Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
+        return doRequest(registerRequest, "/user", "POST", RegisterResult.class, null);
     }
 
     public LoginResult login(String username, String password){
         LoginRequest loginRequest = new LoginRequest(username,password);
-
-        try{
-            URL url = new URI("http://localhost:8080/session").toURL();
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Accept", "application/json");
-            con.setDoOutput(true);
-
-            String json = serializer.toJson(loginRequest);
-
-            try(OutputStream outputStream = con.getOutputStream()) {
-                byte[] input = json.getBytes(StandardCharsets.UTF_8);
-                outputStream.write(input, 0, input.length);
-            } catch (Exception e){
-                throw new RuntimeException();
-            }
-
-            int responseCode = con.getResponseCode();
-            if(responseCode != 200){
-                throw new RuntimeException(con.getResponseMessage());
-            }
-
-            try(BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-
-                return serializer.fromJson(response.toString(),LoginResult.class);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
-            }
-
-        } catch (Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
-
+        return doRequest(loginRequest, "/session", "POST", LoginResult.class, null);
     }
 
     public String logout(String authToken){
-        try{
-            URL url = new URI("http://localhost:8080/session").toURL();
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("DELETE");
-            con.setRequestProperty("Accept", "application/json");
-            con.addRequestProperty("Authorization", authToken);
-
-
-            int responseCode = con.getResponseCode();
-            if(responseCode != 200){
-                throw new RuntimeException(con.getResponseMessage());
-            }
-
-            try(BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-
-                return response.toString();
-
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
-            }
-
-        } catch (Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
+        return doRequest(null, "/session", "DELETE", String.class, authToken);
     }
 
     public CreateGameResult createGame(String authToken, String gameName){
         CreateGameRequest createGameRequest = new CreateGameRequest(authToken, gameName);
-
-        try{
-            URL url = new URI("http://localhost:8080/game").toURL();
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Accept", "application/json");
-            con.setDoOutput(true);
-            con.addRequestProperty("Authorization", authToken);
-
-            String json = serializer.toJson(createGameRequest);
-
-            try(OutputStream outputStream = con.getOutputStream()) {
-                byte[] input = json.getBytes(StandardCharsets.UTF_8);
-                outputStream.write(input, 0, input.length);
-            } catch (Exception e){
-                throw new RuntimeException();
-            }
-
-            int responseCode = con.getResponseCode();
-            if(responseCode != 200){
-                throw new RuntimeException(con.getResponseMessage());
-            }
-
-            try(BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-
-                return serializer.fromJson(response.toString(),CreateGameResult.class);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
-            }
-
-        } catch (Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
+        return doRequest(createGameRequest, "/game", "POST", CreateGameResult.class, authToken);
     }
 
     public String joinGame(String authToken, String playerColor, int gameID){
         JoinGameRequest joinGameRequest = new JoinGameRequest(authToken, playerColor, gameID);
-
-        try{
-            URL url = new URI("http://localhost:8080/game").toURL();
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("PUT");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Accept", "application/json");
-            con.setDoOutput(true);
-            con.addRequestProperty("Authorization", authToken);
-
-            String json = serializer.toJson(joinGameRequest);
-
-            try(OutputStream outputStream = con.getOutputStream()) {
-                byte[] input = json.getBytes(StandardCharsets.UTF_8);
-                outputStream.write(input, 0, input.length);
-            } catch (Exception e){
-                throw new RuntimeException();
-            }
-
-            int responseCode = con.getResponseCode();
-            if(responseCode != 200){
-                throw new RuntimeException(con.getResponseMessage());
-            }
-
-            try(BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-
-                return response.toString();
-
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
-            }
-
-        } catch (Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
+        return doRequest(joinGameRequest, "/game", "PUT", String.class, authToken);
     }
 
     public ListGamesResult listGames(String authToken){
-
-        try{
-            URL url = new URI("http://localhost:8080/game").toURL();
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("GET");
-            //con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Accept", "application/json");
-            con.addRequestProperty("Authorization", authToken);
-
-            int responseCode = con.getResponseCode();
-            if(responseCode != 200){
-                throw new RuntimeException(con.getResponseMessage());
-            }
-
-            try(BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-
-                return serializer.fromJson(response.toString(),ListGamesResult.class);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
-            }
-
-        } catch (Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
+        return doRequest(null, "/game", "GET", ListGamesResult.class, authToken);
     }
 
-    public static String clearAll(){
-        try{
-            URL url = new URI("http://localhost:8080/db").toURL();
-            HttpURLConnection con = (HttpURLConnection)url.openConnection();
-            con.setRequestMethod("DELETE");
-            con.setRequestProperty("Accept", "application/json");
-            //con.addRequestProperty("Authorization", authToken);
-
-
-            int responseCode = con.getResponseCode();
-            if(responseCode != 200){
-                throw new RuntimeException(con.getResponseMessage());
-            }
-
-            try(BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine = null;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-
-                return response.toString();
-
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage());
-            }
-
-        } catch (Exception e){
-            throw new RuntimeException(e.getMessage());
-        }
+    public String clearAll(){
+        return doRequest(null, "/db", "DELETE", String.class, null);
     }
 }
