@@ -115,7 +115,6 @@ public class ServerFacade {
             con.setRequestProperty("Content-Type", "application/json");
             con.setRequestProperty("Accept", "application/json");
             con.setDoOutput(true);
-            //con.addRequestProperty("Authorization", authToken);
 
             String json = serializer.toJson(loginRequest);
 
@@ -282,17 +281,7 @@ public class ServerFacade {
             con.setRequestMethod("GET");
             //con.setRequestProperty("Content-Type", "application/json");
             con.setRequestProperty("Accept", "application/json");
-            //con.setDoOutput(true);
             con.addRequestProperty("Authorization", authToken);
-
-            //String json = serializer.toJson(loginRequest);
-
-            /*try(OutputStream outputStream = con.getOutputStream()) {
-                byte[] input = json.getBytes(StandardCharsets.UTF_8);
-                outputStream.write(input, 0, input.length);
-            } catch (Exception e){
-                throw new RuntimeException();
-            }*/
 
             int responseCode = con.getResponseCode();
             if(responseCode != 200){

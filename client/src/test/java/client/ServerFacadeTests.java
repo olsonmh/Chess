@@ -34,11 +34,6 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void sampleTest() {
-        Assertions.assertTrue(true);
-    }
-
-    @Test
     @DisplayName("Positive Register Test")
     public void positiveRegisterTest(){
         RegisterResult result = myServerFacade.register("micah", "password", "email.com");
