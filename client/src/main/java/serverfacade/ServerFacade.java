@@ -97,11 +97,11 @@ public class ServerFacade {
                 return serializer.fromJson(response.toString(),RegisterResult.class);
 
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage());
             }
 
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -141,11 +141,11 @@ public class ServerFacade {
                 return serializer.fromJson(response.toString(),LoginResult.class);
 
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage());
             }
 
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
 
     }
@@ -175,11 +175,11 @@ public class ServerFacade {
                 return response.toString();
 
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage());
             }
 
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -220,11 +220,11 @@ public class ServerFacade {
                 return serializer.fromJson(response.toString(),CreateGameResult.class);
 
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage());
             }
 
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -265,11 +265,11 @@ public class ServerFacade {
                 return response.toString();
 
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage());
             }
 
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -299,11 +299,11 @@ public class ServerFacade {
                 return serializer.fromJson(response.toString(),ListGamesResult.class);
 
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage());
             }
 
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -332,11 +332,11 @@ public class ServerFacade {
                 return response.toString();
 
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage());
             }
 
         } catch (Exception e){
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 

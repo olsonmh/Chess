@@ -40,7 +40,7 @@ public class Server {
         } catch(UserExistException e){
             res.type("application/json");
             res.status(403);
-            String error = "{ \"message\": \"Error: already taken\" }";
+            String error = "{ \"message\": \"Error: User already taken\" }";
             res.body(error);
             return error;
         } catch(BadRegisterRequestException e){
@@ -127,7 +127,7 @@ public class Server {
         } catch(GameNotFoundException e){
             res.type("application/json");
             res.status(400);
-            String error = "{ \"message\": \"Error: bad request\" }";
+            String error = "{ \"message\": \"Error: bad request game not found\" }";
             res.body(error);
             return error;
         } catch(PlayerAlreadyTakenException e) {

@@ -55,6 +55,7 @@ public class Main {
                 System.out.print("login <Username> <Password> - to login existing user\n");
                 System.out.print("quit - to exit program\n");
                 break;
+            case "exit":
             case "quit":
                 throw new QuitException("quitting");
             case "login":
@@ -66,6 +67,13 @@ public class Main {
                 RegisterResult result = serverFacade.register(tokens[1], tokens[2], tokens[3]);
                 username = result.username();
                 authToken = result.authToken();
+                break;
+            case "logout":
+            case "create":
+            case "list":
+            case "play":
+            case "observe":
+                System.out.print("You must be registered and logged in before you can execute that command\n");
                 break;
             default:
                 System.out.print("You typed something wrong\n");
@@ -83,6 +91,7 @@ public class Main {
                 System.out.print("observe <ID> - observe existing game\n");
                 System.out.print("quit - to exit program\n");
                 break;
+            case "exit":
             case "quit":
                 throw new QuitException("quitting");
             case "logout":
@@ -96,7 +105,8 @@ public class Main {
                 break;
             case "list":
                 ListGamesResult listGamesResult = serverFacade.listGames(authToken);
-                System.out.println("List of Games:\n");
+                System.out.println("List of Games:");
+                System.out.println("--------------------------------------");
                 for (GameDataForListing game : listGamesResult.games()) {
                     System.out.printf("Game ID: %d\n", game.gameID());
                     System.out.printf("Game Name: %s\n", game.gameName());
@@ -105,12 +115,21 @@ public class Main {
                     System.out.println("--------------------------------------");
                 }
                 break;
+            case "join":
             case "play":
+                serverFacade.joinGame(authToken,tokens[2],Integer.parseInt(tokens[1]));
+                System.out.printf("User %s has joined %d\n", username, Integer.parseInt(tokens[1]));
                 break;
             case "observe":
                 break;
+            case "login":
+                System.out.print("A user is already logged in\n");
+                break;
+            case "register":
+                System.out.print("A user is already logged in. You should log out before registering a new user.\n");
+                break;
             default:
-                System.out.print("You typed something wrong");
+                System.out.print("You typed something wrong\n");
         }
     }
 
