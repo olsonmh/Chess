@@ -13,7 +13,7 @@ import ui.exceptions.FailException;
 import ui.exceptions.QuitException;
 
 public class Main {
-    private final static ServerFacade serverFacade = new ServerFacade();
+    private final static ServerFacade SERVER_FACADE = new ServerFacade();
     private static String username;
     private static String authToken;
     private static ChessGame currentGame = new ChessGame();
@@ -63,7 +63,7 @@ public class Main {
                 throw new QuitException("quitting");
             case "login":
                 try {
-                    LoginResult loginResult = serverFacade.login(tokens[1], tokens[2]);
+                    LoginResult loginResult = SERVER_FACADE.login(tokens[1], tokens[2]);
                     username = loginResult.username();
                     authToken = loginResult.authToken();
                 } catch (Exception e) {
@@ -75,7 +75,7 @@ public class Main {
                 break;
             case "register":
                 try {
-                    RegisterResult result = serverFacade.register(tokens[1], tokens[2], tokens[3]);
+                    RegisterResult result = SERVER_FACADE.register(tokens[1], tokens[2], tokens[3]);
                     username = result.username();
                     authToken = result.authToken();
                 } catch (Exception e) {
@@ -113,13 +113,13 @@ public class Main {
             case "quit":
                 throw new QuitException("quitting");
             case "logout":
-                serverFacade.logout(authToken);
+                SERVER_FACADE.logout(authToken);
                 authToken = null;
                 username = null;
                 break;
             case "create":
                 try {
-                    CreateGameResult gameResult = serverFacade.createGame(authToken, tokens[1]);
+                    CreateGameResult gameResult = SERVER_FACADE.createGame(authToken, tokens[1]);
                     System.out.printf("Game %s created with ID: %d\n", tokens[1], gameResult.gameID());
                 } catch (Exception e) {
                     throw new FailException("""
@@ -129,7 +129,7 @@ public class Main {
                 }
                 break;
             case "list":
-                ListGamesResult listGamesResult = serverFacade.listGames(authToken);
+                ListGamesResult listGamesResult = SERVER_FACADE.listGames(authToken);
                 System.out.println("List of Games:");
                 System.out.println("--------------------------------------");
                 for (GameDataForListing game : listGamesResult.games()) {
@@ -143,7 +143,7 @@ public class Main {
             case "join":
             case "play":
                 try {
-                    serverFacade.joinGame(authToken, tokens[2], Integer.parseInt(tokens[1]));
+                    SERVER_FACADE.joinGame(authToken, tokens[2], Integer.parseInt(tokens[1]));
                     playerColor = tokens[2];
                     System.out.printf("User %s has joined %d\n", username, Integer.parseInt(tokens[1]));
                 } catch (Exception e) {

@@ -19,10 +19,10 @@ public class ServerFacade {
         this.serializer = new Gson();
     }
 
-    public <Request,Response> Response doRequest(Request req,
+    public <T,O> O doRequest(T req,
                                                  String endpoint,
                                                  String method,
-                                                 Class<Response> classType,
+                                                 Class<O> classType,
                                                  String authToken){
         try{
             URL url = new URI("http://localhost:8080/" + endpoint).toURL();
