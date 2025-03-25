@@ -19,7 +19,7 @@ public class ServerFacade {
         this.serializer = new Gson();
     }
 
-    public <T,O> O doRequest(T req,
+    private <T,O> O doRequest(T req,
                                                  String endpoint,
                                                  String method,
                                                  Class<O> classType,

@@ -176,10 +176,17 @@ public class ServerFacadeTests {
 
     @Test
     @DisplayName("Positive Clear All Test")
+    public void positiveClearAllTest(){
+        myServerFacade.register("Greg", "newPass", "greg@email.com");
+        myServerFacade.clearAll();
+        assertDoesNotThrow(() -> myServerFacade.register("Greg", "newPass", "greg@email.com"));
+    }
+
+    @Test
+    @DisplayName("Negative Clear All Test")
     public void negativeClearAllTest(){
         myServerFacade.register("Greg", "newPass", "greg@email.com");
         String message = myServerFacade.clearAll();
-        assertDoesNotThrow(() -> myServerFacade.register("Greg", "newPass", "greg@email.com"));
         assert(message.equals("{}"));
     }
 }
