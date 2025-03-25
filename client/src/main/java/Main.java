@@ -68,7 +68,7 @@ public class Main {
                     authToken = loginResult.authToken();
                 } catch (Exception e) {
                     throw new FailException("""
-                                            Could not login. User may not exist.
+                                            Incorrect password or username.
                                              Try 'help' for commands.
                                             """);
                 }
@@ -143,8 +143,8 @@ public class Main {
             case "join":
             case "play":
                 try {
-                    SERVER_FACADE.joinGame(authToken, tokens[2], Integer.parseInt(tokens[1]));
-                    playerColor = tokens[2];
+                    SERVER_FACADE.joinGame(authToken, tokens[2].toUpperCase(), Integer.parseInt(tokens[1]));
+                    playerColor = tokens[2].toUpperCase();
                     System.out.printf("User %s has joined %d\n", username, Integer.parseInt(tokens[1]));
                 } catch (Exception e) {
                     throw new FailException("Could not join game. Game may not exist.\n");

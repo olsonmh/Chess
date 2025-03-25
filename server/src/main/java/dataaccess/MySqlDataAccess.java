@@ -48,15 +48,33 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
     }
 
     @Override
-    public void createGame(GameData gameData){
+    public int createGame(GameData gameData){
         String json = new Gson().toJson(gameData.game());
         if(gameData.gameName() == null){
             throw new RuntimeException();
         }
 
-        String statement = "INSERT INTO game (id, whiteUser, blackUser, name, state) VALUES (%d,null,null,'%s','%s');"
-                .formatted(gameData.gameID(),gameData.gameName().replaceAll("'", "\\\\'"), json);
-        executeStatement(statement);
+        String statement = "INSERT INTO game (whiteUser, blackUser, name, state) VALUES (null,null,'%s','%s');"
+                .formatted(gameData.gameName().replaceAll("'", "\\\\'"), json);
+        String idStatement = "SELECT LAST_INSERT_ID();";
+        try {
+            var connection = DatabaseManager.getConnection();
+            var prepareStatement = connection.prepareStatement(statement);
+            prepareStatement.execute();
+            var prepareStatement2 = connection.prepareStatement(idStatement);
+            ResultSet resultSet =  prepareStatement2.executeQuery();
+            try{
+                if (!resultSet.next()) {
+                    return 0;
+                }
+                return resultSet.getInt(1);
+            }catch (SQLException e){
+                throw new RuntimeException();
+            }
+        } catch (SQLException | DataAccessException e){
+            throw new RuntimeException();
+        }
+
     }
 
     @Override
@@ -179,7 +197,7 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
             """,
             """
             CREATE TABLE IF NOT EXISTS game (
-              id int NOT NULL PRIMARY KEY,
+              id int AUTO_INCREMENT NOT NULL PRIMARY KEY,
               whiteUser varchar(32) DEFAULT NULL,
               blackUser varchar(32) DEFAULT NULL,
               name varchar(256) NOT NULL,

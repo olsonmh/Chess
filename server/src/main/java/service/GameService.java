@@ -28,8 +28,8 @@ public class GameService extends Service{
 
         int gameID = generateGameID();
         ChessGame game = new ChessGame();
-        gameData.createGame(new GameData(gameID, null, null, createGameRequest.gameName(), game));
-        return new CreateGameResult(gameID);
+        int id = gameData.createGame(new GameData(gameID, null, null, createGameRequest.gameName(), game));
+        return new CreateGameResult(id);
 
     }
 
