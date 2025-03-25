@@ -13,16 +13,19 @@ public class ServerFacadeTests {
 
     private static Server server;
     private final ServerFacade myServerFacade = new ServerFacade();
+    private static int serverPort = 8080;
 
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(8080);
+        var port = server.run(0);
+        serverPort = port;
         System.out.println("Started test HTTP server on " + port);
     }
 
     @BeforeEach
     public void setup() {
+        myServerFacade.changePort(serverPort);
         myServerFacade.clearAll();
     }
 
@@ -30,6 +33,7 @@ public class ServerFacadeTests {
     @AfterAll
     static void stopServer() {
         ServerFacade myServerFacade = new ServerFacade();
+        myServerFacade.changePort(serverPort);
         myServerFacade.clearAll();
         server.stop();
     }

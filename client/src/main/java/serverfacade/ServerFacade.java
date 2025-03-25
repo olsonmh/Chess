@@ -14,6 +14,7 @@ import model.objects.*;
 
 public class ServerFacade {
     private final Gson serializer;
+    private int port = 8080;
 
     public ServerFacade(){
         this.serializer = new Gson();
@@ -25,7 +26,7 @@ public class ServerFacade {
                                                  Class<O> classType,
                                                  String authToken){
         try{
-            URL url = new URI("http://localhost:8080/" + endpoint).toURL();
+            URL url = new URI("http://localhost:" + port + endpoint).toURL();
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
             con.setRequestMethod(method);
 
@@ -104,5 +105,9 @@ public class ServerFacade {
 
     public String clearAll(){
         return doRequest(null, "/db", "DELETE", String.class, null);
+    }
+
+    public void changePort(int port){
+        this.port = port;
     }
 }
