@@ -1,7 +1,5 @@
 package client;
 
-import dataaccess.DatabaseManager;
-import dataaccess.MySqlDataAccess;
 import model.GameDataForListing;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -34,7 +32,6 @@ public class ServerFacadeTests {
         ServerFacade.clearAll();
         server.stop();
     }
-
 
     @Test
     public void sampleTest() {
