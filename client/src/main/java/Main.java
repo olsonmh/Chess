@@ -16,7 +16,7 @@ public class Main {
     private final static ServerFacade SERVER_FACADE = new ServerFacade();
     private static String username;
     private static String authToken;
-    private static ChessGame currentGame = new ChessGame();
+    private static final ChessGame currentGame = new ChessGame();
     private static String playerColor;
 
     public static void main(String[] args) {
