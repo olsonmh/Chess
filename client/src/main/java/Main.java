@@ -16,8 +16,7 @@ public class Main {
     private final static ServerFacade SERVER_FACADE = new ServerFacade();
     private static String username;
     private static String authToken;
-    private static ChessGame currentGame = new ChessGame();
-    private static String playerColor;
+    private static final ChessGame currentGame = new ChessGame();
 
     public static void main(String[] args) {
         System.out.print("Welcome to chess\n");
@@ -100,6 +99,7 @@ public class Main {
 
     public static void postLoginCommands(String line){
         var tokens = line.split(" ");
+        String playerColor;
         switch(tokens[0].toLowerCase()){
             case "help":
                 System.out.print("logout - to logout current user\n");
