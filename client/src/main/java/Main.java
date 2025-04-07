@@ -22,7 +22,7 @@ public class Main {
         System.out.print("Welcome to chess\n");
         System.out.print("Type help for more information\n");
         try {
-            while (true) {
+            while (true) { //it will throw an exception
                 if (authToken == null){
                     System.out.print(">>> ");
                 } else {
