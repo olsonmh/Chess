@@ -16,6 +16,8 @@ public class Main {
     private final static ServerFacade SERVER_FACADE = new ServerFacade();
     private static String username;
     private static String authToken;
+    private static String playerColor;
+    private static String inGame;
     private static final ChessGame currentGame = new ChessGame();
 
     public static void main(String[] args) {
@@ -23,18 +25,19 @@ public class Main {
         System.out.print("Type help for more information\n");
         try {
             while (true) { //it will throw an exception
-                if (authToken == null){
-                    System.out.print(">>> ");
-                } else {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE + "[%s] >>> ".formatted(username) + EscapeSequences.RESET_TEXT_COLOR);
-                }
+                linePrint();
                 Scanner scanner = new Scanner(System.in);
                 String line = scanner.nextLine();
                 try {
                     if (authToken == null) {
                         preLoginCommands(line);
                     } else {
-                        postLoginCommands(line);
+                        if (inGame == null){
+                            postLoginCommands(line);
+                        } else{
+                            gameUiCommands(line);
+                        }
+
                     }
                 } catch (QuitException e){
                     throw e;
@@ -48,7 +51,24 @@ public class Main {
             System.out.print("quiting");
         }
     }
-
+    private static void linePrint(){
+        if (authToken == null){
+            System.out.print(">>> ");
+        } else {
+            if (inGame == null) {
+                System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE + "[%s] >>> ".formatted(username) + EscapeSequences.RESET_TEXT_COLOR);
+            } else {
+                if (playerColor == null){
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_YELLOW + "[%s] >>> ".formatted(username) + EscapeSequences.RESET_TEXT_COLOR);
+                }
+                else if (playerColor.equals("BLACK")){
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED + "[%s] >>> ".formatted(username) + EscapeSequences.RESET_TEXT_COLOR);
+                } else {
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE + "[%s] >>> ".formatted(username) + EscapeSequences.RESET_TEXT_COLOR);
+                }
+            }
+        }
+    }
     public static void preLoginCommands(String line){
         var tokens = line.split(" ");
         switch(tokens[0].toLowerCase()){
@@ -99,7 +119,7 @@ public class Main {
 
     public static void postLoginCommands(String line){
         var tokens = line.split(" ");
-        String playerColor;
+        //String playerColor;
         switch(tokens[0].toLowerCase()){
             case "help":
                 System.out.print("logout - to logout current user\n");
@@ -149,10 +169,12 @@ public class Main {
                 } catch (Exception e) {
                     throw new FailException("Could not join game. Game may not exist.\n");
                 }
-                drawBoard(currentGame, playerColor);
+                inGame = "yes";
+                drawBoard(currentGame, playerColor, null);
                 break;
             case "observe":
-                drawBoard(currentGame, "WHITE");
+                inGame = "yes";
+                drawBoard(currentGame, "WHITE", null);
                 break;
             case "login":
                 System.out.print("A user is already logged in\n");
@@ -165,7 +187,47 @@ public class Main {
         }
     }
 
-    public static void drawBoard(ChessGame game, String color){
+    public static void gameUiCommands(String line){
+        var tokens = line.split(" ");
+        switch(tokens[0].toLowerCase()){
+            case "help":
+                //System.out.print("logout - to logout current user\n");
+                System.out.print("highlight <piece> - highlights legal moves for piece\n");
+                System.out.print("resign \n");
+                System.out.print("move piece - move piece\n");
+                System.out.print("draw - redraw chessboard\n");
+                System.out.print("leave - to leave current game\n");
+                break;
+            case "exit":
+            case "quit":
+                throw new QuitException("quitting");
+            case "draw":
+                drawBoard(currentGame, playerColor, null);
+                break;
+            case "leave":
+                inGame = null;
+                playerColor = null;
+                break;
+            case "highlight":
+                String piece = tokens[1];
+                drawBoard(currentGame, playerColor, piece);
+                break;
+            default:
+                System.out.print("You typed something wrong\n");
+        }
+    }
+
+    private static void getValidMoves(String piece){
+        String firstLetter = piece.substring(0, 1);
+        String secondLetter = piece.substring(1, 2);
+
+    }
+
+    public static void drawBoard(ChessGame game, String color, String highlightPiece){
+        if (highlightPiece != null){
+            getValidMoves(highlightPiece);
+        }
+
         String backgroundColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
         boolean flipBoard = color.equals("WHITE");
 
