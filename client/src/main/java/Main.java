@@ -1,5 +1,6 @@
 import chess.*;
-import java.util.Scanner;
+
+import java.util.*;
 
 import model.GameDataForListing;
 import model.objects.CreateGameResult;
@@ -174,7 +175,8 @@ public class Main {
                 break;
             case "observe":
                 inGame = "yes";
-                drawBoard(currentGame, "WHITE", null);
+                playerColor = "WHITE";
+                drawBoard(currentGame, playerColor, null);
                 break;
             case "login":
                 System.out.print("A user is already logged in\n");
@@ -217,15 +219,45 @@ public class Main {
         }
     }
 
-    private static void getValidMoves(String piece){
+    private static Set<ChessPosition> getValidMoves(ChessPosition pose){
+        Collection<ChessMove> moves = currentGame.validMoves(pose);
+        Set<ChessPosition> positions = new HashSet<>();
+        //String name = currentGame.getBoard().getPiece(new ChessPosition(firstNumber,secondNumber)).getPieceType().name();
+        //System.out.print(name);
+        for (ChessMove move : moves) {
+            positions.add(move.getEndPosition());
+        }
+
+        return positions;
+    }
+
+    public static ChessPosition getPose(String piece){
         String firstLetter = piece.substring(0, 1);
         String secondLetter = piece.substring(1, 2);
+        Map<String, Integer> letterToNumber = new HashMap<>();
 
+        letterToNumber.put("a", 1);
+        letterToNumber.put("b", 2);
+        letterToNumber.put("c", 3);
+        letterToNumber.put("d", 4);
+        letterToNumber.put("e", 5);
+        letterToNumber.put("f", 6);
+        letterToNumber.put("g", 7);
+        letterToNumber.put("h", 8);
+
+        int secondNumber = letterToNumber.get(firstLetter);
+        int firstNumber = Integer.parseInt(secondLetter);
+        return new ChessPosition(firstNumber, secondNumber);
     }
 
     public static void drawBoard(ChessGame game, String color, String highlightPiece){
+        Set<ChessPosition> positions = new HashSet<>();
+        ChessPosition pose = null;
         if (highlightPiece != null){
-            getValidMoves(highlightPiece);
+            pose = getPose(highlightPiece);
+            positions = getValidMoves(pose);
+            //System.out.printf("pose is row %d col %d\n", pose.getRow(), pose.getColumn());
+            //System.out.printf("piece is %s\n", currentGame.getBoard().getPiece(pose).getTeamColor().name());
         }
 
         String backgroundColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
@@ -249,7 +281,20 @@ public class Main {
 
             for(int j = 0; j<=7; j++){
 
-                backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
+                if (!positions.isEmpty()){
+                    if (positions.contains(new ChessPosition(8-i,j+1))) {
+                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_GREEN_TINT_WHITE : EscapeSequences.SET_BG_COLOR_GREEN_TINT_BLACK;
+                    } else {
+                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
+                    }
+                } else {
+                    backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
+                }
+                if (pose != null){
+                    if (pose.equals(new ChessPosition(8-i,j+1))){
+                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_YELLOW : EscapeSequences.SET_BG_COLOR_YELLOW;
+                    }
+                }
 
                 String label;
                 ChessPiece piece = game.getBoard().board[row][j];
