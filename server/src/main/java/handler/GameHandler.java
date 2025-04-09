@@ -1,5 +1,6 @@
 package handler;
 
+import model.GameData;
 import model.objects.*;
 import service.exceptions.*;
 import service.GameService;
@@ -34,5 +35,9 @@ public class GameHandler {
         JoinGameRequest joinGameRequest = serializer.fromJson(json, JoinGameRequest.class);
         joinGameRequest = new JoinGameRequest(authToken, joinGameRequest.playerColor(), joinGameRequest.gameID());
         service.joinGame(joinGameRequest);
+    }
+
+    public GameData getGame(int gameID){
+        return service.getGame(gameID);
     }
 }

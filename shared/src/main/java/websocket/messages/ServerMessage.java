@@ -9,16 +9,22 @@ import java.util.Objects;
  * methods.
  */
 public class ServerMessage {
-    ServerMessageType serverMessageType;
+    public final ServerMessageType serverMessageType;
+    public final String json;
 
     public enum ServerMessageType {
         LOAD_GAME,
         ERROR,
         NOTIFICATION
     }
-
     public ServerMessage(ServerMessageType type) {
         this.serverMessageType = type;
+        this.json = null;
+    }
+
+    public ServerMessage(ServerMessageType type, String json) {
+        this.serverMessageType = type;
+        this.json = json;
     }
 
     public ServerMessageType getServerMessageType() {

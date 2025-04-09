@@ -1,5 +1,13 @@
 import chess.*;
 
+import com.google.gson.Gson;
+import model.GameData;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
+import ui.Draw;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import model.GameDataForListing;
@@ -13,15 +21,32 @@ import serverfacade.ServerFacade;
 import ui.exceptions.FailException;
 import ui.exceptions.QuitException;
 
-public class Main {
+import javax.websocket.*;
+
+public class Main extends Endpoint {
     private final static ServerFacade SERVER_FACADE = new ServerFacade();
     private static String username;
     private static String authToken;
     private static String playerColor;
-    private static String inGame;
-    private static final ChessGame currentGame = new ChessGame();
+    private static boolean inGame = false;
+    private static ChessGame currentGame = new ChessGame();
 
-    public static void main(String[] args) {
+
+    public Gson serializer = new Gson();
+    public int currentGameID;
+    public Session session;
+
+    Queue<String> messageQueue = new LinkedList<>();
+    boolean isDrawing = false;
+
+    public static void main(String[] args){
+        new Main().run(args);
+    }
+    public Main(){
+        session = null;
+    }
+
+    public void run(String[] args) {
         System.out.print("Welcome to chess\n");
         System.out.print("Type help for more information\n");
         try {
@@ -33,7 +58,7 @@ public class Main {
                     if (authToken == null) {
                         preLoginCommands(line);
                     } else {
-                        if (inGame == null){
+                        if (!inGame){
                             postLoginCommands(line);
                         } else{
                             gameUiCommands(line);
@@ -52,11 +77,11 @@ public class Main {
             System.out.print("quiting");
         }
     }
-    private static void linePrint(){
+    public static void linePrint(){
         if (authToken == null){
             System.out.print(">>> ");
         } else {
-            if (inGame == null) {
+            if (!inGame) {
                 System.out.print(EscapeSequences.SET_TEXT_COLOR_WHITE + "[%s] >>> ".formatted(username) + EscapeSequences.RESET_TEXT_COLOR);
             } else {
                 if (playerColor == null){
@@ -70,7 +95,7 @@ public class Main {
             }
         }
     }
-    public static void preLoginCommands(String line){
+    public void preLoginCommands(String line){
         var tokens = line.split(" ");
         switch(tokens[0].toLowerCase()){
             case "help":
@@ -118,7 +143,7 @@ public class Main {
         }
     }
 
-    public static void postLoginCommands(String line){
+    public void postLoginCommands(String line){
         var tokens = line.split(" ");
         //String playerColor;
         switch(tokens[0].toLowerCase()){
@@ -164,19 +189,47 @@ public class Main {
             case "join":
             case "play":
                 try {
-                    SERVER_FACADE.joinGame(authToken, tokens[2].toUpperCase(), Integer.parseInt(tokens[1]));
+                    currentGameID = Integer.parseInt(tokens[1]);
                     playerColor = tokens[2].toUpperCase();
-                    System.out.printf("User %s has joined %d\n", username, Integer.parseInt(tokens[1]));
+                    SERVER_FACADE.joinGame(authToken, playerColor, currentGameID);
+                    //playerColor = tokens[2].toUpperCase();
+                    //System.out.printf("User %s has joined %d\n", username, currentGameID);
                 } catch (Exception e) {
                     throw new FailException("Could not join game. Game may not exist.\n");
                 }
-                inGame = "yes";
-                drawBoard(currentGame, playerColor, null);
+
+                try {
+                    URI uri = new URI("ws://localhost:8080/ws");
+
+                    WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+                    this.session = container.connectToServer(this, uri);
+
+                    this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+                        public void onMessage(String message) {
+                            //System.out.print(message);
+                            messageQueue.offer(message);
+                            processNextMessage();
+                        }
+                    });
+
+                    UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameID);
+                    String json = serializer.toJson(connectCommand);
+                    this.session.getBasicRemote().sendText(json);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+                inGame = true;
+
+                //startDraw();
+                //Draw.drawBoard(currentGame, playerColor, null);
+                //endDraw();
+
                 break;
             case "observe":
-                inGame = "yes";
-                playerColor = "WHITE";
-                drawBoard(currentGame, playerColor, null);
+                inGame = true;
+                //playerColor = "WHITE";
+                Draw.drawBoard(currentGame, "WHITE", null);
                 break;
             case "login":
                 System.out.print("A user is already logged in\n");
@@ -189,7 +242,7 @@ public class Main {
         }
     }
 
-    public static void gameUiCommands(String line){
+    public void gameUiCommands(String line){
         var tokens = line.split(" ");
         switch(tokens[0].toLowerCase()){
             case "help":
@@ -204,136 +257,74 @@ public class Main {
             case "quit":
                 throw new QuitException("quitting");
             case "draw":
-                drawBoard(currentGame, playerColor, null);
+                if (playerColor == null){
+                    Draw.drawBoard(currentGame, "WHITE", null);
+                } else{
+                    Draw.drawBoard(currentGame, playerColor, null);
+                }
+
                 break;
             case "leave":
-                inGame = null;
+                inGame = false;
                 playerColor = null;
                 break;
+            case "h":
             case "highlight":
                 String piece = tokens[1];
-                drawBoard(currentGame, playerColor, piece);
+                Draw.drawBoard(currentGame, playerColor, piece);
+                break;
+            case "move":
+                ChessPosition startPose = Draw.getPose(tokens[1]);
+                ChessPosition endPose = Draw.getPose(tokens[2]);
+                try {
+                    currentGame.makeMove(new ChessMove(startPose, endPose, null));
+                } catch (InvalidMoveException e){
+                    System.out.print("Invalid Move.\n");
+                }
                 break;
             default:
                 System.out.print("You typed something wrong\n");
         }
     }
 
-    private static Set<ChessPosition> getValidMoves(ChessPosition pose){
-        Collection<ChessMove> moves = currentGame.validMoves(pose);
-        Set<ChessPosition> positions = new HashSet<>();
-        //String name = currentGame.getBoard().getPiece(new ChessPosition(firstNumber,secondNumber)).getPieceType().name();
-        //System.out.print(name);
-        for (ChessMove move : moves) {
-            positions.add(move.getEndPosition());
-        }
+    private void loadGame(String json){
+        //System.out.print("I made it to load game!!\n");
+        GameData gameData = serializer.fromJson(json, GameData.class);
 
-        return positions;
+        startDraw();
+        Draw.drawBoard(gameData.game(), playerColor, null);
+        linePrint();
+        endDraw();
+
+        currentGame = gameData.game();
     }
 
-    public static ChessPosition getPose(String piece){
-        String firstLetter = piece.substring(0, 1);
-        String secondLetter = piece.substring(1, 2);
-        Map<String, Integer> letterToNumber = new HashMap<>();
+    private void processNextMessage() {
 
-        letterToNumber.put("a", 1);
-        letterToNumber.put("b", 2);
-        letterToNumber.put("c", 3);
-        letterToNumber.put("d", 4);
-        letterToNumber.put("e", 5);
-        letterToNumber.put("f", 6);
-        letterToNumber.put("g", 7);
-        letterToNumber.put("h", 8);
+        while (!isDrawing && !messageQueue.isEmpty()) {
+            //System.out.print("I made it to processNextMessage!!!\n");
+            String message = messageQueue.poll();
+            //System.out.print(message);
 
-        int secondNumber = letterToNumber.get(firstLetter);
-        int firstNumber = Integer.parseInt(secondLetter);
-        return new ChessPosition(firstNumber, secondNumber);
+            ServerMessage serverMessage = serializer.fromJson(message, ServerMessage.class);
+            //System.out.print("I made it to processNextMessage!!!\n");
+            switch(serverMessage.getServerMessageType()){
+                case LOAD_GAME -> loadGame(serverMessage.json);
+                //case NOTIFICATION -> printNotification();
+                //case ERROR -> printError();
+            }
+        }
     }
 
-    public static void drawBoard(ChessGame game, String color, String highlightPiece){
-        Set<ChessPosition> positions = new HashSet<>();
-        ChessPosition pose = null;
-        if (highlightPiece != null){
-            pose = getPose(highlightPiece);
-            positions = getValidMoves(pose);
-            //System.out.printf("pose is row %d col %d\n", pose.getRow(), pose.getColumn());
-            //System.out.printf("piece is %s\n", currentGame.getBoard().getPiece(pose).getTeamColor().name());
-        }
-
-        String backgroundColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
-        boolean flipBoard = color.equals("WHITE");
-
-        System.out.printf("%s   ", backgroundColor);
-        if (flipBoard) {
-            for (char ch = 'a'; ch <= 'h'; ch++) {
-                System.out.printf("%s %s ", backgroundColor, ch);
-            }
-        } else{
-            for (char ch = 'h'; ch >= 'a'; ch--) {
-                System.out.printf("%s %s ", backgroundColor, ch);
-            }
-        }
-        System.out.printf("%s   " + EscapeSequences.RESET_BG_COLOR + "\n", backgroundColor);
-
-        for(int i = 0; i<=7; i++){
-            int row = flipBoard ? 7 - i : i;
-            System.out.printf("%s %d ", EscapeSequences.SET_BG_COLOR_LIGHT_GREY, row+1);
-
-            for(int j = 0; j<=7; j++){
-
-                if (!positions.isEmpty()){
-                    if (positions.contains(new ChessPosition(8-i,j+1))) {
-                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_GREEN_TINT_WHITE : EscapeSequences.SET_BG_COLOR_GREEN_TINT_BLACK;
-                    } else {
-                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
-                    }
-                } else {
-                    backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
-                }
-                if (pose != null){
-                    if (pose.equals(new ChessPosition(8-i,j+1))){
-                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_YELLOW : EscapeSequences.SET_BG_COLOR_YELLOW;
-                    }
-                }
-
-                String label;
-                ChessPiece piece = game.getBoard().board[row][j];
-                if (piece == null) {
-                    label = "   ";
-                } else {
-                    label = switch (piece.getPieceType()) {
-                        case PAWN -> EscapeSequences.BLACK_PAWN;
-                        case ROOK -> EscapeSequences.BLACK_ROOK;
-                        case KNIGHT -> EscapeSequences.BLACK_KNIGHT;
-                        case QUEEN -> EscapeSequences.BLACK_QUEEN;
-                        case KING -> EscapeSequences.BLACK_KING;
-                        case BISHOP -> EscapeSequences.BLACK_BISHOP;
-                    };
-                    if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                        label = EscapeSequences.SET_TEXT_COLOR_BLUE + label + EscapeSequences.RESET_TEXT_COLOR;
-                    } else {
-                        label = EscapeSequences.SET_TEXT_COLOR_RED + label + EscapeSequences.RESET_TEXT_COLOR;
-                    }
-                }
-                System.out.printf("%s%s", backgroundColor, label);
-            }
-            System.out.printf("%s %d ", EscapeSequences.SET_BG_COLOR_LIGHT_GREY, row+1);
-            System.out.print(EscapeSequences.RESET_BG_COLOR + "\n");
-        }
-
-        backgroundColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
-        System.out.printf("%s   ", backgroundColor);
-        if (flipBoard){
-            for (char ch = 'a'; ch <= 'h'; ch++) {
-                System.out.printf("%s %s ", backgroundColor, ch);
-            }
-        } else {
-            for (char ch = 'h'; ch >= 'a'; ch--) {
-                System.out.printf("%s %s ", backgroundColor, ch);
-            }
-        }
-        System.out.printf("%s   " + EscapeSequences.RESET_BG_COLOR + "\n", backgroundColor);
-
+    public void startDraw() {
+        isDrawing = true;
     }
 
+    public void endDraw() {
+        isDrawing = false;
+        processNextMessage();
+    }
+
+    public void onOpen(Session session, EndpointConfig endpointConfig) {
+    }
 }

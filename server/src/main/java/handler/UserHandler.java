@@ -32,4 +32,7 @@ public class UserHandler {
         service.logout(logoutRequest);
     }
 
+    public String getUsername(String authToken){
+        return service.getUsername(authToken);
+    }
 }

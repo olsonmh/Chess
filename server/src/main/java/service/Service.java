@@ -1,5 +1,8 @@
 package service;
 import dataaccess.*;
+import model.AuthData;
+import model.GameData;
+
 import java.util.UUID;
 import java.util.Random;
 
@@ -13,6 +16,15 @@ public abstract class Service {
 
     public static String generateToken() {
         return UUID.randomUUID().toString();
+    }
+
+    public String getUsername(String authToken){
+        AuthData auth = authData.getAuth(authToken);
+        return auth.username();
+    }
+
+    public GameData getGame(int gameID){
+        return gameData.getGame(gameID);
     }
 
     public static int generateGameID() {

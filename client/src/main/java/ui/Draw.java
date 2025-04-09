@@ -7,6 +7,7 @@ import chess.ChessPosition;
 
 import java.util.*;
 
+
 public class Draw {
     public static void drawBoard(ChessGame game, String color, String highlightPiece){
         Set<ChessPosition> positions = new HashSet<>();
@@ -21,7 +22,7 @@ public class Draw {
         String backgroundColor = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
         boolean flipBoard = color.equals("WHITE");
 
-        System.out.printf("%s   ", backgroundColor);
+        System.out.printf("\n%s   ", backgroundColor);
         if (flipBoard) {
             for (char ch = 'a'; ch <= 'h'; ch++) {
                 System.out.printf("%s %s ", backgroundColor, ch);
@@ -91,6 +92,7 @@ public class Draw {
             }
         }
         System.out.printf("%s   " + EscapeSequences.RESET_BG_COLOR + "\n", backgroundColor);
+
     }
 
     private static Set<ChessPosition> getValidMoves(ChessPosition pose, ChessGame currentGame){
@@ -121,4 +123,5 @@ public class Draw {
         int firstNumber = Integer.parseInt(secondLetter);
         return new ChessPosition(firstNumber, secondNumber);
     }
+
 }

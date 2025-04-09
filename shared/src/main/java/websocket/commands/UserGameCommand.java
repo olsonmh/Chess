@@ -16,11 +16,22 @@ public class UserGameCommand {
 
     private final Integer gameID;
 
+    private final String json;
+
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
+        this.json = null;
     }
+
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, String json) {
+        this.commandType = commandType;
+        this.authToken = authToken;
+        this.gameID = gameID;
+        this.json = json;
+    }
+
 
     public enum CommandType {
         CONNECT,
