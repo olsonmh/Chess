@@ -52,6 +52,8 @@ public class UserGameCommand {
         return gameID;
     }
 
+    public String getJson(){return json;}
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

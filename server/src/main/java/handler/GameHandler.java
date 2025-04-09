@@ -40,4 +40,8 @@ public class GameHandler {
     public GameData getGame(int gameID){
         return service.getGame(gameID);
     }
+
+    public void updateGame(GameData game){
+        service.updateGame(game);
+    }
 }

@@ -27,6 +27,10 @@ public abstract class Service {
         return gameData.getGame(gameID);
     }
 
+    public void updateGame(GameData game){
+        gameData.updateGame(game);
+    }
+
     public static int generateGameID() {
         Random random = new Random();
         return 100000 + random.nextInt(900000);

@@ -121,12 +121,19 @@ public class MySqlDataAccess implements GameDAO, UserDAO, AuthDAO {
             String statement2 = "UPDATE game SET whiteUser = '%s' WHERE id = %d;"
                                 .formatted(gameData.whiteUsername(), gameData.gameID());
             executeStatement(statement2);
+        } else{
+            String statement2 = "UPDATE game SET whiteUser = NULL WHERE id = %d;".formatted(gameData.gameID());
+            executeStatement(statement2);
         }
         if(gameData.blackUsername() != null){
             String statement3 = "UPDATE game SET blackUser = '%s' WHERE id = %d;"
                                 .formatted(gameData.blackUsername(), gameData.gameID());
             executeStatement(statement3);
+        } else{
+            String statement2 = "UPDATE game SET blackUser = NULL WHERE id = %d;".formatted(gameData.gameID());
+            executeStatement(statement2);
         }
+
         executeStatement(statement);
     }
 
