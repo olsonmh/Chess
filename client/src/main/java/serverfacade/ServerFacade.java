@@ -110,4 +110,8 @@ public class ServerFacade {
     public void changePort(int port){
         this.port = port;
     }
+
+    public int getPort(){
+        return this.port;
+    }
 }

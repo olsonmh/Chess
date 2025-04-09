@@ -198,26 +198,9 @@ public class Main extends Endpoint {
                     throw new FailException("Could not join game. Game may not exist.\n");
                 }
 
-                try {
-                    URI uri = new URI("ws://localhost:8080/ws");
+                UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameID);
+                executeCommand(connectCommand);
 
-                    WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-                    this.session = container.connectToServer(this, uri);
-
-                    this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-                        public void onMessage(String message) {
-                            //System.out.print(message);
-                            messageQueue.offer(message);
-                            processNextMessage();
-                        }
-                    });
-
-                    UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameID);
-                    String json = serializer.toJson(connectCommand);
-                    this.session.getBasicRemote().sendText(json);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
 
                 inGame = true;
 
@@ -227,9 +210,14 @@ public class Main extends Endpoint {
 
                 break;
             case "observe":
+                currentGameID = Integer.parseInt(tokens[1]);
+                playerColor = "WHITE";
+
                 inGame = true;
                 //playerColor = "WHITE";
-                Draw.drawBoard(currentGame, "WHITE", null);
+                UserGameCommand observeCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameID);
+                executeCommand(observeCommand);
+                //Draw.drawBoard(currentGame, "WHITE", null);
                 break;
             case "login":
                 System.out.print("A user is already logged in\n");
@@ -253,9 +241,9 @@ public class Main extends Endpoint {
                 System.out.print("draw - redraw chessboard\n");
                 System.out.print("leave - to leave current game\n");
                 break;
-            case "exit":
+            /*case "exit":
             case "quit":
-                throw new QuitException("quitting");
+                throw new QuitException("quitting");*/
             case "draw":
                 if (playerColor == null){
                     Draw.drawBoard(currentGame, "WHITE", null);
@@ -265,8 +253,17 @@ public class Main extends Endpoint {
 
                 break;
             case "leave":
+                UserGameCommand leaveCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, currentGameID);
+                executeCommand(leaveCommand);
+                //linePrint();
+
                 inGame = false;
                 playerColor = null;
+                break;
+            case "resign":
+                UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameID);
+                executeCommand(resignCommand);
+                linePrint();
                 break;
             case "h":
             case "highlight":
@@ -276,19 +273,45 @@ public class Main extends Endpoint {
             case "move":
                 ChessPosition startPose = Draw.getPose(tokens[1]);
                 ChessPosition endPose = Draw.getPose(tokens[2]);
-                try {
-                    currentGame.makeMove(new ChessMove(startPose, endPose, null));
-                } catch (InvalidMoveException e){
-                    System.out.print("Invalid Move.\n");
-                }
+                ChessMove move = new ChessMove(startPose, endPose, null);
+                //System.out.printf("\nstart pose is %d %d and end pose is %d %d\n", startPose.getRow(), startPose.getColumn(), endPose.getRow(), endPose.getColumn());
+                String json = serializer.toJson(move);
+
+                UserGameCommand moveCommand = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, json);
+                executeCommand(moveCommand);
                 break;
             default:
                 System.out.print("You typed something wrong\n");
         }
     }
 
+    private void executeCommand(UserGameCommand command){
+        try {
+            //URI uri = new URI("ws://localhost:8080/ws");
+            URI uri = new URI("ws://localhost:"+ SERVER_FACADE.getPort() + "/ws");
+
+            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+            this.session = container.connectToServer(this, uri);
+
+            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
+                public void onMessage(String message) {
+                    messageQueue.offer(message);
+                    processNextMessage();
+                }
+            });
+
+            //UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, currentGameID);
+            String json = serializer.toJson(command);
+            this.session.getBasicRemote().sendText(json);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void loadGame(String json){
         //System.out.print("I made it to load game!!\n");
+
+
         GameData gameData = serializer.fromJson(json, GameData.class);
 
         startDraw();
@@ -297,6 +320,14 @@ public class Main extends Endpoint {
         endDraw();
 
         currentGame = gameData.game();
+    }
+
+    private void printNotification(String message){
+        System.out.print(message);
+    }
+
+    private void printError(String message){
+        System.out.print(message);
     }
 
     private void processNextMessage() {
@@ -309,9 +340,9 @@ public class Main extends Endpoint {
             ServerMessage serverMessage = serializer.fromJson(message, ServerMessage.class);
             //System.out.print("I made it to processNextMessage!!!\n");
             switch(serverMessage.getServerMessageType()){
-                case LOAD_GAME -> loadGame(serverMessage.json);
-                //case NOTIFICATION -> printNotification();
-                //case ERROR -> printError();
+                case LOAD_GAME -> loadGame(serverMessage.game);
+                case NOTIFICATION -> printNotification(serverMessage.game);
+                case ERROR -> printError(serverMessage.game);
             }
         }
     }

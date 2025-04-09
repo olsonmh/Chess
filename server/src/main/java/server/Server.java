@@ -1,7 +1,11 @@
 package server;
 
+import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import model.GameData;
+import org.glassfish.grizzly.utils.EchoFilter;
 import service.exceptions.*;
 import spark.*;
 import handler.*;
@@ -184,7 +188,170 @@ public class Server {
         ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, json);
         String jsonMessage = serializer.toJson(loadGameMessage);
 
+        for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
+            org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
+            String mesg;
+            if (username.equals(game.whiteUsername())) {
+                mesg = String.format("\n%s has joined game %d as white player\n", username, command.getGameID());
+
+            } else if (username.equals(game.blackUsername())) {
+                mesg = String.format("\n%s has joined game %d as black player\n", username, command.getGameID());
+            } else {
+                mesg = String.format("\n%s has joined game %d as observer\n", username, command.getGameID());
+            }
+            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, mesg);
+            String jsonNotification = serializer.toJson(notification);
+            if (!storedSession.equals(session)) {
+                storedSession.getRemote().sendString(jsonNotification);
+            }
+        }
+
+
         session.getRemote().sendString(jsonMessage);
+    }
+
+    private void leaveGame(org.eclipse.jetty.websocket.api.Session session, String username, UserGameCommand command) throws Exception{
+        GameData game = gameHandler.getGame(command.getGameID());
+
+        if (username.equals(game.whiteUsername())){
+            GameData updatedGame = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
+            gameHandler.updateGame(updatedGame);
+
+            /*
+            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "\nSupposedly white player left\n");
+            String jsonNotification = serializer.toJson(notification);
+            session.getRemote().sendString(jsonNotification);*/
+
+        } else if (username.equals(game.blackUsername())){
+            GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game());
+            gameHandler.updateGame(updatedGame);
+        }
+
+        for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
+            org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
+            String mesg;
+            if (username.equals(game.whiteUsername())) {
+                mesg = String.format("\n%s has left game %d\n", username, command.getGameID());
+
+            } else if (username.equals(game.blackUsername())) {
+                mesg = String.format("\n%s has left game %d\n", username, command.getGameID());
+            } else {
+                mesg = String.format("\n%s has left game %d\n", username, command.getGameID());
+            }
+            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, mesg);
+            String jsonNotification = serializer.toJson(notification);
+            storedSession.getRemote().sendString(jsonNotification);
+        }
+
+        clientSessions.remove(username);
+
+    }
+
+    private void resign(org.eclipse.jetty.websocket.api.Session session, String username, UserGameCommand command) throws Exception{
+        String message = String.format("\n%s has resigned\n", username);
+        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        String jsonNotification = serializer.toJson(notification);
+        session.getRemote().sendString(jsonNotification);
+    }
+
+    private void makeMove(org.eclipse.jetty.websocket.api.Session session, String username, UserGameCommand command) throws Exception{
+        GameData game = gameHandler.getGame(command.getGameID());
+        ChessMove move = serializer.fromJson(command.getJson(), ChessMove.class);
+
+        ChessGame chessGame = game.game();
+        try {
+            chessGame.makeMove(move);
+
+
+        } catch (InvalidMoveException e) {
+            String message = "\ninvalid move. It may not be your turn or invalid input was entered.\n";
+            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message);
+            String jsonNotification = serializer.toJson(notification);
+            session.getRemote().sendString(jsonNotification);
+        }
+
+        GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+        gameHandler.updateGame(updatedGame);
+
+        isInCheck(updatedGame, username);
+
+        String json = serializer.toJson(updatedGame);
+        ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, json);
+        String jsonMessage = serializer.toJson(loadGameMessage);
+
+        for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
+            org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
+
+            String mesg = String.format("\n%s had moved %s from %s%s to %s%S\n",
+                    username,
+                    updatedGame.game().getBoard().getPiece(move.getEndPosition()).getPieceType().name().toLowerCase(),
+                    numberToLetter(move.getStartPosition().getColumn()),
+                    move.getStartPosition().getRow(),
+                    numberToLetter(move.getEndPosition().getColumn()),
+                    move.getEndPosition().getRow());
+
+            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, mesg);
+            String jsonNotification = serializer.toJson(notification);
+            storedSession.getRemote().sendString(jsonNotification);
+
+            storedSession.getRemote().sendString(jsonMessage);
+        }
+    }
+
+    private String numberToLetter(int number){
+        Map<Integer, String> letterToNumber = new HashMap<>();
+        letterToNumber.put(1, "a");
+        letterToNumber.put(2, "b");
+        letterToNumber.put(3, "c");
+        letterToNumber.put(4, "d");
+        letterToNumber.put(5, "e");
+        letterToNumber.put(6, "f");
+        letterToNumber.put(7, "g");
+        letterToNumber.put(8, "h");
+        return letterToNumber.get(number);
+    }
+
+    private void isInCheck(GameData gameData, String username) throws Exception{
+        boolean check = false;
+        boolean checkMate = false;
+        String checkedPlayer = null;
+
+        if (username.equals(gameData.blackUsername())){
+            if (gameData.game().isInCheck(ChessGame.TeamColor.WHITE)){
+                if (gameData.game().isInCheckmate(ChessGame.TeamColor.WHITE)){
+                    checkMate = true;
+                } else {
+                    check = true;
+                }
+                checkedPlayer = gameData.blackUsername();
+            }
+        } else if (username.equals(gameData.whiteUsername())){
+            if (gameData.game().isInCheck(ChessGame.TeamColor.BLACK)){
+                if (gameData.game().isInCheckmate(ChessGame.TeamColor.BLACK)){
+                    checkMate = true;
+                } else {
+                    check = true;
+                }
+                checkedPlayer = gameData.whiteUsername();
+            }
+        }
+        if (check || checkMate) {
+            for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
+                org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
+                String message = null;
+                if (checkMate){
+                    message = String.format("%s is in checkmate", checkedPlayer);
+                } else {
+                    message = String.format("%s is in check", checkedPlayer);
+                }
+
+                ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+                String jsonNotification = serializer.toJson(notification);
+                storedSession.getRemote().sendString(jsonNotification);
+
+                //storedSession.getRemote().sendString(jsonMessage);
+            }
+        }
     }
 
     @OnWebSocketMessage
@@ -207,9 +374,9 @@ public class Server {
             //session.getRemote().sendString("WebSocket2 response: " + message);
             switch(command.getCommandType()){
                 case CONNECT -> connect(session, username, command);
-                //case MAKE_MOVE -> makeMove(session, username, command);
-                //case RESIGN -> resign(session, username, command);
-                //case LEAVE -> leaveGame(session, username, command);
+                case MAKE_MOVE -> makeMove(session, username, command);
+                case RESIGN -> resign(session, username, command);
+                case LEAVE -> leaveGame(session, username, command);
             }
 
         } catch (Exception e){
