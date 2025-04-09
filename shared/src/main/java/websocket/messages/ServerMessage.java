@@ -11,6 +11,7 @@ import java.util.Objects;
 public class ServerMessage {
     public final ServerMessageType serverMessageType;
     public final String game;
+    public final String message;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -20,11 +21,27 @@ public class ServerMessage {
     public ServerMessage(ServerMessageType type) {
         this.serverMessageType = type;
         this.game = null;
+        this.message = null;
+
     }
 
     public ServerMessage(ServerMessageType type, String json) {
         this.serverMessageType = type;
-        this.game = json;
+        switch(type){
+            case LOAD_GAME:
+                this.game = json;
+                this.message = null;
+                break;
+            case ERROR:
+            case NOTIFICATION:
+                this.game = null;
+                this.message = json;
+                break;
+            default:
+                this.game = json;
+                this.message = json;
+                break;
+        }
     }
 
     public ServerMessageType getServerMessageType() {

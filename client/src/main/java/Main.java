@@ -341,8 +341,8 @@ public class Main extends Endpoint {
             //System.out.print("I made it to processNextMessage!!!\n");
             switch(serverMessage.getServerMessageType()){
                 case LOAD_GAME -> loadGame(serverMessage.game);
-                case NOTIFICATION -> printNotification(serverMessage.game);
-                case ERROR -> printError(serverMessage.game);
+                case NOTIFICATION -> printNotification(serverMessage.message);
+                case ERROR -> printError(serverMessage.message);
             }
         }
     }
