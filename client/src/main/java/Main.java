@@ -285,8 +285,8 @@ public class Main extends Endpoint {
             case "m":
             case "move":
                 try {
-                    ChessPosition startPose = Draw.getPose(tokens[1], playerColor);
-                    ChessPosition endPose = Draw.getPose(tokens[2], playerColor);
+                    ChessPosition startPose = Draw.getPose(tokens[1]);
+                    ChessPosition endPose = Draw.getPose(tokens[2]);
                     ChessMove move = new ChessMove(startPose, endPose, null);
 
                     if (endPose.getRow() == 8 &&

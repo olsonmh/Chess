@@ -17,7 +17,7 @@ public class Draw {
         Set<ChessPosition> positions = new HashSet<>();
         ChessPosition pose = null;
         if (highlightPiece != null){
-            pose = getPose(highlightPiece, color);
+            pose = getPose(highlightPiece);
             positions = getValidMoves(pose, game);
         }
 
@@ -114,7 +114,7 @@ public class Draw {
         return positions;
     }
 
-    public static ChessPosition getPose(String piece, String color){
+    public static ChessPosition getPose(String piece){
         String firstLetter = piece.substring(0, 1);
         String secondLetter = piece.substring(1, 2);
         Map<String, Integer> letterToNumber = new HashMap<>();
@@ -130,7 +130,6 @@ public class Draw {
 
         int secondNumber = letterToNumber.get(firstLetter);
         int firstNumber = Integer.parseInt(secondLetter);
-        //System.out.printf("is at row %d and col %d on chessboard",firstNumber, secondNumber);
         return new ChessPosition(firstNumber, secondNumber);
     }
 
