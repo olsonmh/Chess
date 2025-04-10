@@ -1,5 +1,7 @@
 package websocket.commands;
 
+import chess.ChessMove;
+
 import java.util.Objects;
 
 /**
@@ -18,11 +20,22 @@ public class UserGameCommand {
 
     private final String json;
 
+    private final ChessMove move;
+
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
         this.json = null;
+        this.move = null;
+    }
+
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID, ChessMove move) {
+        this.commandType = commandType;
+        this.authToken = authToken;
+        this.gameID = gameID;
+        this.json = null;
+        this.move = move;
     }
 
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID, String json) {
@@ -30,6 +43,7 @@ public class UserGameCommand {
         this.authToken = authToken;
         this.gameID = gameID;
         this.json = json;
+        this.move = null;
     }
 
 
@@ -53,6 +67,8 @@ public class UserGameCommand {
     }
 
     public String getJson(){return json;}
+
+    public ChessMove getMove(){return move;}
 
     @Override
     public boolean equals(Object o) {

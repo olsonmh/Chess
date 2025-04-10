@@ -13,15 +13,25 @@ import java.util.Objects;
 public class ChessGame {
     private TeamColor turn;
     private ChessBoard chessBoard;
+    private String winner;
 
     public ChessGame() {
         turn = TeamColor.WHITE;
         chessBoard = new ChessBoard();
         chessBoard.resetBoard();
+        winner = null;
     }
 
     public TeamColor getTeamTurn() {
         return turn;
+    }
+
+    public String getWinner() {
+        return winner;
+    }
+
+    public void setWinner(String winPlayer){
+        this.winner = winPlayer;
     }
 
     public void setTeamTurn(TeamColor team) {

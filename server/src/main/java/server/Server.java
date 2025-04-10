@@ -25,7 +25,8 @@ public class Server {
     private final ClearHandler clearHandler = new ClearHandler();
     Gson serializer = new Gson();
 
-    Map<String, org.eclipse.jetty.websocket.api.Session> clientSessions = new HashMap<>();
+    Map<Integer, Map<String, org.eclipse.jetty.websocket.api.Session>> clientSessions = new HashMap<>();
+    //Map<String, org.eclipse.jetty.websocket.api.Session> clientSessions = new HashMap<>();
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -196,7 +197,8 @@ public class Server {
             ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, json);
             String jsonMessage = serializer.toJson(loadGameMessage);
 
-            for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
+            var gameSessionMap = clientSessions.get(command.getGameID());
+            for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : gameSessionMap.entrySet()) {
                 org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
                 String mesg;
                 if (username.equals(game.whiteUsername())) {
@@ -236,7 +238,8 @@ public class Server {
             gameHandler.updateGame(updatedGame);
         }
 
-        for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
+        var gameSessionMap = clientSessions.get(command.getGameID());
+        for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : gameSessionMap.entrySet()) {
             org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
             String mesg;
             if (username.equals(game.whiteUsername())) {
@@ -249,23 +252,72 @@ public class Server {
             }
             ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, mesg);
             String jsonNotification = serializer.toJson(notification);
-            storedSession.getRemote().sendString(jsonNotification);
+            if (!session.equals(storedSession)) {
+                storedSession.getRemote().sendString(jsonNotification);
+            }
         }
 
-        clientSessions.remove(username);
+        clientSessions.get(command.getGameID()).remove(username);
+        //clientSessions.remove(username);
 
     }
 
     private void resign(org.eclipse.jetty.websocket.api.Session session, String username, UserGameCommand command) throws Exception{
-        String message = String.format("\n%s has resigned\n", username);
-        ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        String jsonNotification = serializer.toJson(notification);
-        session.getRemote().sendString(jsonNotification);
+        GameData game = gameHandler.getGame(command.getGameID());
+        ChessGame chessGame = game.game();
+
+        if (chessGame.getWinner() != null){
+            String errorMessage = "\nGame is over you cannot resign.\n";
+            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
+            String jsonError = serializer.toJson(errorNotification);
+            session.getRemote().sendString(jsonError);
+            return;
+        }
+
+        if (username.equals(game.whiteUsername())){
+            if (game.blackUsername() == null){
+                chessGame.setWinner("No Winner");
+            } else {
+                chessGame.setWinner(game.blackUsername());
+            }
+        } else if (username.equals(game.blackUsername())){
+            if (game.whiteUsername() == null){
+                chessGame.setWinner("No Winner");
+            } else {
+                chessGame.setWinner(game.whiteUsername());
+            }
+        } else {
+            String errorMessage = "\nYou are not able to resign.\n";
+            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
+            String jsonError = serializer.toJson(errorNotification);
+            session.getRemote().sendString(jsonError);
+            return;
+        }
+        GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+        gameHandler.updateGame(updatedGame);
+
+        var gameSessionMap = clientSessions.get(command.getGameID());
+        for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : gameSessionMap.entrySet()) {
+            org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
+
+            String message = String.format("\n%s has resigned\n", username);
+            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+            String jsonNotification = serializer.toJson(notification);
+            storedSession.getRemote().sendString(jsonNotification);
+        }
     }
 
     private void makeMove(org.eclipse.jetty.websocket.api.Session session, String username, UserGameCommand command) throws Exception{
         GameData game = gameHandler.getGame(command.getGameID());
-        ChessMove move = serializer.fromJson(command.getJson(), ChessMove.class);
+        if (game.game().getWinner() != null){
+            String errorMessage = "\nGame is over bud.\n";
+            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
+            String jsonError = serializer.toJson(errorNotification);
+            session.getRemote().sendString(jsonError);
+            return;
+        }
+        //ChessMove move = serializer.fromJson(command.getJson(), ChessMove.class);
+        ChessMove move = command.getMove();
 
         if (username.equals(game.whiteUsername())){
             if (!game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor().equals(ChessGame.TeamColor.WHITE)){
@@ -296,11 +348,6 @@ public class Server {
         try {
             chessGame.makeMove(move);
 
-            String se = "\nmade it here.\n";
-            ServerMessage not = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, se);
-            String jnot = serializer.toJson(not);
-            session.getRemote().sendString(jnot);
-
         } catch (InvalidMoveException e) {
             String message = "\nInvalid move. It may not be your turn or invalid input was entered.\n";
             ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message);
@@ -317,7 +364,8 @@ public class Server {
         ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, json);
         String jsonMessage = serializer.toJson(loadGameMessage);
 
-        for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
+        var gameSessionMap = clientSessions.get(command.getGameID());
+        for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : gameSessionMap.entrySet()) {
             org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
             String mesg = String.format("\n%s had moved %s from %s%s to %s%S\n",
                     username,
@@ -375,7 +423,8 @@ public class Server {
             }
         }
         if (check || checkMate) {
-            for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
+            var gameSessionMap = clientSessions.get(gameData.gameID());
+            for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : gameSessionMap.entrySet()) {
                 org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
                 String message = null;
                 if (checkMate){
@@ -402,17 +451,24 @@ public class Server {
 
         //Gson serializer = new Gson();
         try{
-            UserGameCommand command = serializer.fromJson(message, UserGameCommand.class);
-            String auth = command.getAuthToken();
+            //System.out.printf("\nSend the friken message\n");
 
+            //UserGameCommand command2 = serializer.fromJson(s, UserGameCommand.class);
+            //System.out.print("\nthis json works 1\n");
+            UserGameCommand command = serializer.fromJson(message, UserGameCommand.class);
+            //System.out.print("\nthis json works 2\n");
+
+            String auth = command.getAuthToken();
 
 
             String username = userHandler.getUsername(auth);
 
 
             //session.getRemote().sendString("WebSocket1 response: " + message);
-
-            clientSessions.put(username, session);
+            if (!clientSessions.containsKey(command.getGameID())){
+                clientSessions.put(command.getGameID(), new HashMap<>());
+            }
+            clientSessions.get(command.getGameID()).put(username, session);
             //session.getRemote().sendString("WebSocket2 response: " + message);
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, username, command);

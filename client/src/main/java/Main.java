@@ -189,11 +189,17 @@ public class Main extends Endpoint {
             case "join":
             case "play":
                 try {
-                    currentGameID = Integer.parseInt(tokens[1]);
+                    try {
+                        currentGameID = Integer.parseInt(tokens[1]);
+                    } catch (NumberFormatException e) {
+                        throw new FailException("Error, game id not valid\n");
+                    }
                     playerColor = tokens[2].toUpperCase();
                     SERVER_FACADE.joinGame(authToken, playerColor, currentGameID);
                     //playerColor = tokens[2].toUpperCase();
                     //System.out.printf("User %s has joined %d\n", username, currentGameID);
+                } catch (FailException e){
+                    throw e;
                 } catch (Exception e) {
                     throw new FailException("Could not join game. Game may not exist.\n");
                 }
@@ -210,13 +216,22 @@ public class Main extends Endpoint {
 
                 break;
             case "observe":
-                currentGameID = Integer.parseInt(tokens[1]);
+                if (tokens.length < 2){
+                    throw new FailException("Error, no game id given.\n");
+                }
+                try {
+                    currentGameID = Integer.parseInt(tokens[1]);
+                } catch (NumberFormatException e) {
+                    throw new FailException("Error, game id not valid\n");
+                }
                 //playerColor = "WHITE";
 
                 inGame = true;
                 //playerColor = "WHITE";
                 UserGameCommand observeCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameID);
                 executeCommand(observeCommand);
+
+
                 //Draw.drawBoard(currentGame, "WHITE", null);
                 break;
             case "login":
@@ -235,9 +250,9 @@ public class Main extends Endpoint {
         switch(tokens[0].toLowerCase()){
             case "help":
                 //System.out.print("logout - to logout current user\n");
-                System.out.print("highlight <piece> - highlights legal moves for piece\n");
-                System.out.print("resign \n");
-                System.out.print("move piece - move piece\n");
+                System.out.print("highlight <piece location> - highlights legal moves for piece e.g. b2\n");
+                System.out.print("resign - forfeit game\n");
+                System.out.print("move <start location> <end location> - move piece e.g. b2 b4\n");
                 System.out.print("draw - redraw chessboard\n");
                 System.out.print("leave - to leave current game\n");
                 break;
@@ -263,21 +278,22 @@ public class Main extends Endpoint {
             case "resign":
                 UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameID);
                 executeCommand(resignCommand);
-                linePrint();
+                //linePrint();
                 break;
             case "h":
             case "highlight":
                 String piece = tokens[1];
                 Draw.drawBoard(currentGame, playerColor, piece);
                 break;
+            case "m":
             case "move":
                 ChessPosition startPose = Draw.getPose(tokens[1], playerColor);
                 ChessPosition endPose = Draw.getPose(tokens[2], playerColor);
                 ChessMove move = new ChessMove(startPose, endPose, null);
                 //System.out.printf("\nstart pose is %d %d and end pose is %d %d\n", startPose.getRow(), startPose.getColumn(), endPose.getRow(), endPose.getColumn());
-                String json = serializer.toJson(move);
+                //String json = serializer.toJson(move);
 
-                UserGameCommand moveCommand = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, json);
+                UserGameCommand moveCommand = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, move);
                 executeCommand(moveCommand);
                 break;
             default:
@@ -329,7 +345,11 @@ public class Main extends Endpoint {
 
     private void printError(String message){
         System.out.print(message);
+        if (message.equals("\nGame not found.\n")){
+            inGame = false;
+        }
         linePrint();
+
     }
 
     private void processNextMessage() {
