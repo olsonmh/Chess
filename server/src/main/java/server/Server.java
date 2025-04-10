@@ -5,7 +5,6 @@ import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import model.GameData;
-import org.glassfish.grizzly.utils.EchoFilter;
 import service.exceptions.*;
 import spark.*;
 import handler.*;
@@ -228,11 +227,6 @@ public class Server {
             GameData updatedGame = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
             gameHandler.updateGame(updatedGame);
 
-            /*
-            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "\nSupposedly white player left\n");
-            String jsonNotification = serializer.toJson(notification);
-            session.getRemote().sendString(jsonNotification);*/
-
         } else if (username.equals(game.blackUsername())){
             GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game());
             gameHandler.updateGame(updatedGame);
@@ -258,8 +252,6 @@ public class Server {
         }
 
         clientSessions.get(command.getGameID()).remove(username);
-        //clientSessions.remove(username);
-
     }
 
     private void resign(org.eclipse.jetty.websocket.api.Session session, String username, UserGameCommand command) throws Exception{
@@ -316,7 +308,6 @@ public class Server {
             session.getRemote().sendString(jsonError);
             return;
         }
-        //ChessMove move = serializer.fromJson(command.getJson(), ChessMove.class);
         ChessMove move = command.getMove();
 
         if (username.equals(game.whiteUsername())){
@@ -380,7 +371,6 @@ public class Server {
             if (!session.equals(storedSession)){
                 storedSession.getRemote().sendString(jsonNotification);
             }
-
             storedSession.getRemote().sendString(jsonMessage);
         }
     }
@@ -436,8 +426,6 @@ public class Server {
                 ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
                 String jsonNotification = serializer.toJson(notification);
                 storedSession.getRemote().sendString(jsonNotification);
-
-                //storedSession.getRemote().sendString(jsonMessage);
             }
         }
     }
@@ -446,37 +434,22 @@ public class Server {
     public void onMessage(org.eclipse.jetty.websocket.api.Session session, String message) throws Exception {
         System.out.printf("Received: %s", message);
         System.out.flush();
-
-
-
-        //Gson serializer = new Gson();
         try{
-            //System.out.printf("\nSend the friken message\n");
-
-            //UserGameCommand command2 = serializer.fromJson(s, UserGameCommand.class);
-            //System.out.print("\nthis json works 1\n");
             UserGameCommand command = serializer.fromJson(message, UserGameCommand.class);
-            //System.out.print("\nthis json works 2\n");
-
             String auth = command.getAuthToken();
-
-
             String username = userHandler.getUsername(auth);
 
-
-            //session.getRemote().sendString("WebSocket1 response: " + message);
             if (!clientSessions.containsKey(command.getGameID())){
                 clientSessions.put(command.getGameID(), new HashMap<>());
             }
             clientSessions.get(command.getGameID()).put(username, session);
-            //session.getRemote().sendString("WebSocket2 response: " + message);
+
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, username, command);
                 case MAKE_MOVE -> makeMove(session, username, command);
                 case RESIGN -> resign(session, username, command);
                 case LEAVE -> leaveGame(session, username, command);
             }
-
 
         } catch (AuthTokenNotFoundException e){
             String mesg = "\nAuthentication token not found.\n";
@@ -486,6 +459,5 @@ public class Server {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 }
