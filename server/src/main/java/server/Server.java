@@ -312,25 +312,16 @@ public class Server {
 
         if (username.equals(game.whiteUsername())){
             if (!game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor().equals(ChessGame.TeamColor.WHITE)){
-                String errorMessage = "\nYou are not authorized to move that piece.\n";
-                ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
-                String jsonError = serializer.toJson(errorNotification);
-                session.getRemote().sendString(jsonError);
+                sendUnauthorizedPieceMoveError(session);
                 return;
             }
         } else if (username.equals(game.blackUsername())){
             if (!game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor().equals(ChessGame.TeamColor.BLACK)){
-                String errorMessage = "\nYou are not authorized to move that piece.\n";
-                ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
-                String jsonError = serializer.toJson(errorNotification);
-                session.getRemote().sendString(jsonError);
+                sendUnauthorizedPieceMoveError(session);
                 return;
             }
         } else {
-            String errorMessage = "\nYou are not authorized to move that piece.\n";
-            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
-            String jsonError = serializer.toJson(errorNotification);
-            session.getRemote().sendString(jsonError);
+            sendUnauthorizedPieceMoveError(session);
             return;
         }
 
@@ -428,6 +419,13 @@ public class Server {
                 storedSession.getRemote().sendString(jsonNotification);
             }
         }
+    }
+
+    private void sendUnauthorizedPieceMoveError(org.eclipse.jetty.websocket.api.Session session) throws Exception{
+        String errorMessage = "\nYou are not authorized to move that piece.\n";
+        ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
+        String jsonError = serializer.toJson(errorNotification);
+        session.getRemote().sendString(jsonError);
     }
 
     @OnWebSocketMessage

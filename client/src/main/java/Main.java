@@ -56,14 +56,13 @@ public class Main extends Endpoint {
                 try {
                     if (authToken == null) {
                         preLoginCommands(line);
+                    } else if (!inGame){
+                        postLoginCommands(line);
                     } else {
-                        if (!inGame){
-                            postLoginCommands(line);
-                        } else{
-                            gameUiCommands(line);
-                        }
-
+                        gameUiCommands(line);
                     }
+
+
                 } catch (QuitException e){
                     throw e;
                 } catch (Exception e) {

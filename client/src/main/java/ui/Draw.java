@@ -47,16 +47,20 @@ public class Draw {
                 int col2 = flipBoard ? j+1 : 8 -j;
                 if (!positions.isEmpty()){
                     if (positions.contains(new ChessPosition(row2,col2))) {
-                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_GREEN_TINT_WHITE : EscapeSequences.SET_BG_COLOR_GREEN_TINT_BLACK;
+                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_GREEN_TINT_WHITE :
+                                EscapeSequences.SET_BG_COLOR_GREEN_TINT_BLACK;
                     } else {
-                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
+                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE :
+                                EscapeSequences.SET_BG_COLOR_BLACK;
                     }
                 } else {
-                    backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
+                    backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_WHITE :
+                            EscapeSequences.SET_BG_COLOR_BLACK;
                 }
                 if (pose != null){
                     if (pose.equals(new ChessPosition(row2,col2))){
-                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_YELLOW : EscapeSequences.SET_BG_COLOR_YELLOW_BLACK;
+                        backgroundColor = (i + j) % 2 == 0 ? EscapeSequences.SET_BG_COLOR_YELLOW :
+                                EscapeSequences.SET_BG_COLOR_YELLOW_BLACK;
                     }
                 }
 
