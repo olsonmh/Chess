@@ -211,7 +211,7 @@ public class Main extends Endpoint {
                 break;
             case "observe":
                 currentGameID = Integer.parseInt(tokens[1]);
-                playerColor = "WHITE";
+                //playerColor = "WHITE";
 
                 inGame = true;
                 //playerColor = "WHITE";
@@ -271,8 +271,8 @@ public class Main extends Endpoint {
                 Draw.drawBoard(currentGame, playerColor, piece);
                 break;
             case "move":
-                ChessPosition startPose = Draw.getPose(tokens[1]);
-                ChessPosition endPose = Draw.getPose(tokens[2]);
+                ChessPosition startPose = Draw.getPose(tokens[1], playerColor);
+                ChessPosition endPose = Draw.getPose(tokens[2], playerColor);
                 ChessMove move = new ChessMove(startPose, endPose, null);
                 //System.out.printf("\nstart pose is %d %d and end pose is %d %d\n", startPose.getRow(), startPose.getColumn(), endPose.getRow(), endPose.getColumn());
                 String json = serializer.toJson(move);
@@ -324,10 +324,12 @@ public class Main extends Endpoint {
 
     private void printNotification(String message){
         System.out.print(message);
+        linePrint();
     }
 
     private void printError(String message){
         System.out.print(message);
+        linePrint();
     }
 
     private void processNextMessage() {
@@ -342,7 +344,7 @@ public class Main extends Endpoint {
             switch(serverMessage.getServerMessageType()){
                 case LOAD_GAME -> loadGame(serverMessage.game);
                 case NOTIFICATION -> printNotification(serverMessage.message);
-                case ERROR -> printError(serverMessage.message);
+                case ERROR -> printError(serverMessage.errorMessage);
             }
         }
     }

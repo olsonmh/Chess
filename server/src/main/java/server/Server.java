@@ -184,30 +184,39 @@ public class Server {
 
     private void connect(org.eclipse.jetty.websocket.api.Session session, String username, UserGameCommand command) throws Exception{
         GameData game = gameHandler.getGame(command.getGameID());
-        String json = serializer.toJson(game);
-        ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, json);
-        String jsonMessage = serializer.toJson(loadGameMessage);
 
-        for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
-            org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
-            String mesg;
-            if (username.equals(game.whiteUsername())) {
-                mesg = String.format("\n%s has joined game %d as white player\n", username, command.getGameID());
-
-            } else if (username.equals(game.blackUsername())) {
-                mesg = String.format("\n%s has joined game %d as black player\n", username, command.getGameID());
-            } else {
-                mesg = String.format("\n%s has joined game %d as observer\n", username, command.getGameID());
-            }
-            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, mesg);
+        if (game == null){
+            String mesg = "\nGame not found.\n";
+            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, mesg);
             String jsonNotification = serializer.toJson(notification);
-            if (!storedSession.equals(session)) {
-                storedSession.getRemote().sendString(jsonNotification);
+            session.getRemote().sendString(jsonNotification);
+        } else {
+
+            String json = serializer.toJson(game);
+            ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, json);
+            String jsonMessage = serializer.toJson(loadGameMessage);
+
+            for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
+                org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
+                String mesg;
+                if (username.equals(game.whiteUsername())) {
+                    mesg = String.format("\n%s has joined game %d as white player\n", username, command.getGameID());
+
+                } else if (username.equals(game.blackUsername())) {
+                    mesg = String.format("\n%s has joined game %d as black player\n", username, command.getGameID());
+                } else {
+                    mesg = String.format("\n%s has joined game %d as observer\n", username, command.getGameID());
+                }
+                ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, mesg);
+                String jsonNotification = serializer.toJson(notification);
+                if (!storedSession.equals(session)) {
+                    storedSession.getRemote().sendString(jsonNotification);
+                }
             }
+
+
+            session.getRemote().sendString(jsonMessage);
         }
-
-
-        session.getRemote().sendString(jsonMessage);
     }
 
     private void leaveGame(org.eclipse.jetty.websocket.api.Session session, String username, UserGameCommand command) throws Exception{
@@ -258,13 +267,42 @@ public class Server {
         GameData game = gameHandler.getGame(command.getGameID());
         ChessMove move = serializer.fromJson(command.getJson(), ChessMove.class);
 
+        if (username.equals(game.whiteUsername())){
+            if (!game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor().equals(ChessGame.TeamColor.WHITE)){
+                String errorMessage = "\nYou are not authorized to move that piece.\n";
+                ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
+                String jsonError = serializer.toJson(errorNotification);
+                session.getRemote().sendString(jsonError);
+                return;
+            }
+        } else if (username.equals(game.blackUsername())){
+            if (!game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor().equals(ChessGame.TeamColor.BLACK)){
+                String errorMessage = "\nYou are not authorized to move that piece.\n";
+                ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
+                String jsonError = serializer.toJson(errorNotification);
+                session.getRemote().sendString(jsonError);
+                return;
+            }
+        } else {
+            String errorMessage = "\nYou are not authorized to move that piece.\n";
+            ServerMessage errorNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
+            String jsonError = serializer.toJson(errorNotification);
+            session.getRemote().sendString(jsonError);
+            return;
+        }
+
+
         ChessGame chessGame = game.game();
         try {
             chessGame.makeMove(move);
 
+            String se = "\nmade it here.\n";
+            ServerMessage not = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, se);
+            String jnot = serializer.toJson(not);
+            session.getRemote().sendString(jnot);
 
         } catch (InvalidMoveException e) {
-            String message = "\ninvalid move. It may not be your turn or invalid input was entered.\n";
+            String message = "\nInvalid move. It may not be your turn or invalid input was entered.\n";
             ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, message);
             String jsonNotification = serializer.toJson(notification);
             session.getRemote().sendString(jsonNotification);
@@ -281,7 +319,6 @@ public class Server {
 
         for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : clientSessions.entrySet()) {
             org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
-
             String mesg = String.format("\n%s had moved %s from %s%s to %s%S\n",
                     username,
                     updatedGame.game().getBoard().getPiece(move.getEndPosition()).getPieceType().name().toLowerCase(),
@@ -292,7 +329,9 @@ public class Server {
 
             ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, mesg);
             String jsonNotification = serializer.toJson(notification);
-            storedSession.getRemote().sendString(jsonNotification);
+            if (!session.equals(storedSession)){
+                storedSession.getRemote().sendString(jsonNotification);
+            }
 
             storedSession.getRemote().sendString(jsonMessage);
         }
@@ -366,20 +405,29 @@ public class Server {
             UserGameCommand command = serializer.fromJson(message, UserGameCommand.class);
             String auth = command.getAuthToken();
 
+
+
             String username = userHandler.getUsername(auth);
+
 
             //session.getRemote().sendString("WebSocket1 response: " + message);
 
             clientSessions.put(username, session);
             //session.getRemote().sendString("WebSocket2 response: " + message);
-            switch(command.getCommandType()){
+            switch (command.getCommandType()) {
                 case CONNECT -> connect(session, username, command);
                 case MAKE_MOVE -> makeMove(session, username, command);
                 case RESIGN -> resign(session, username, command);
                 case LEAVE -> leaveGame(session, username, command);
             }
 
-        } catch (Exception e){
+
+        } catch (AuthTokenNotFoundException e){
+            String mesg = "\nAuthentication token not found.\n";
+            ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, mesg);
+            String jsonNotification = serializer.toJson(notification);
+            session.getRemote().sendString(jsonNotification);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

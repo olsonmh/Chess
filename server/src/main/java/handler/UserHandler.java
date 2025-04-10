@@ -32,7 +32,7 @@ public class UserHandler {
         service.logout(logoutRequest);
     }
 
-    public String getUsername(String authToken){
+    public String getUsername(String authToken) throws AuthTokenNotFoundException{
         return service.getUsername(authToken);
     }
 }

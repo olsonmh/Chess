@@ -12,6 +12,7 @@ public class ServerMessage {
     public final ServerMessageType serverMessageType;
     public final String game;
     public final String message;
+    public final String errorMessage;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -22,6 +23,7 @@ public class ServerMessage {
         this.serverMessageType = type;
         this.game = null;
         this.message = null;
+        this.errorMessage = null;
 
     }
 
@@ -31,15 +33,22 @@ public class ServerMessage {
             case LOAD_GAME:
                 this.game = json;
                 this.message = null;
+                this.errorMessage = null;
                 break;
             case ERROR:
+                this.game = null;
+                this.message = null;
+                this.errorMessage = json;
+                break;
             case NOTIFICATION:
                 this.game = null;
                 this.message = json;
+                this.errorMessage = null;
                 break;
             default:
                 this.game = json;
                 this.message = json;
+                this.errorMessage = json;
                 break;
         }
     }

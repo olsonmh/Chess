@@ -37,7 +37,7 @@ public class GameHandler {
         service.joinGame(joinGameRequest);
     }
 
-    public GameData getGame(int gameID){
+    public GameData getGame(int gameID) throws GameNotFoundException{
         return service.getGame(gameID);
     }
 
