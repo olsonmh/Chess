@@ -73,6 +73,7 @@ public class Main extends Endpoint {
             System.out.print("quiting");
         }
     }
+
     public static void linePrint(){
         if (authToken == null){
             System.out.print(">>> ");
@@ -252,26 +253,80 @@ public class Main extends Endpoint {
                 playerColor = null;
                 break;
             case "resign":
-                UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameID);
-                executeCommand(resignCommand);
+                System.out.print("Are you sure you wish to resign?\n");
+                Scanner scanner = new Scanner(System.in);
+                String confirmMessage = scanner.nextLine().toLowerCase();
+                switch(confirmMessage){
+                    case "y":
+                    case "ye":
+                    case "yep":
+                    case "yes":
+                        UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameID);
+                        executeCommand(resignCommand);
+                        break;
+                    case "no":
+                        break;
+                    default:
+                        throw new FailException("Input could not be understood.\n");
+                }
+
                 break;
             case "h":
             case "highlight":
-                String piece = tokens[1];
-                Draw.drawBoard(currentGame, playerColor, piece);
+                try {
+                    String piece = tokens[1];
+                    Draw.drawBoard(currentGame, playerColor, piece);
+                } catch (NumberFormatException e){
+                    throw new FailException("Input was invalid.\n");
+                } catch (Exception e) {
+                    throw new FailException("Something was typed wrong.\n");
+                }
                 break;
             case "m":
             case "move":
-                ChessPosition startPose = Draw.getPose(tokens[1], playerColor);
-                ChessPosition endPose = Draw.getPose(tokens[2], playerColor);
-                ChessMove move = new ChessMove(startPose, endPose, null);
+                try {
+                    ChessPosition startPose = Draw.getPose(tokens[1], playerColor);
+                    ChessPosition endPose = Draw.getPose(tokens[2], playerColor);
+                    ChessMove move = new ChessMove(startPose, endPose, null);
 
-                UserGameCommand moveCommand = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, move);
-                executeCommand(moveCommand);
+                    if (endPose.getRow() == 8 &&
+                            currentGame.getBoard().getPiece(startPose).getPieceType().equals(ChessPiece.PieceType.PAWN) &&
+                            playerColor.equalsIgnoreCase("white")){
+                        ChessPiece.PieceType promoPiece = getPromoPiece();
+                        move = new ChessMove(startPose, endPose, promoPiece);
+                    } else if (endPose.getRow() == 1 &&
+                            currentGame.getBoard().getPiece(startPose).getPieceType().equals(ChessPiece.PieceType.PAWN) &&
+                            playerColor.equalsIgnoreCase("black")){
+                        ChessPiece.PieceType promoPiece = getPromoPiece();
+                        move = new ChessMove(startPose, endPose, promoPiece);
+                    }
+
+
+                    UserGameCommand moveCommand = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameID, move);
+                    executeCommand(moveCommand);
+                } catch (NumberFormatException e){
+                    throw new FailException("Input was invalid.\n");
+                } catch (Exception e) {
+                    throw new FailException("Something was typed wrong.\n");
+                }
                 break;
             default:
                 System.out.print("You typed something wrong\n");
         }
+    }
+
+    public ChessPiece.PieceType getPromoPiece(){
+        System.out.print("What piece would you like to promote your pawn to?\n");
+        System.out.print("[rook] | [knight] | [queen] | [bishop]\n");
+        Scanner scanner = new Scanner(System.in);
+        String promotionPiece = scanner.nextLine().toLowerCase();
+        return switch (promotionPiece) {
+            case "queen" -> ChessPiece.PieceType.QUEEN;
+            case "rook" -> ChessPiece.PieceType.ROOK;
+            case "bishop" -> ChessPiece.PieceType.BISHOP;
+            case "knight" -> ChessPiece.PieceType.KNIGHT;
+            default -> throw new FailException("Piece not valid\n");
+        };
     }
 
     private void executeCommand(UserGameCommand command){

@@ -340,7 +340,12 @@ public class Server {
         GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
         gameHandler.updateGame(updatedGame);
 
-        isInCheck(updatedGame, username);
+        String checkMate = isInCheck(updatedGame, username);
+        if (checkMate != null){
+            chessGame.setWinner(checkMate);
+            GameData updateGameWinner = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), chessGame);
+            gameHandler.updateGame(updateGameWinner);
+        }
 
         String json = serializer.toJson(updatedGame);
         ServerMessage loadGameMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, json);
@@ -379,28 +384,31 @@ public class Server {
         return letterToNumber.get(number);
     }
 
-    private void isInCheck(GameData gameData, String username) throws Exception{
+    private String isInCheck(GameData gameData, String username) throws Exception{
         boolean check = false;
         boolean checkMate = false;
         String checkedPlayer = null;
+        String winner = null;
 
         if (username.equals(gameData.blackUsername())){
             if (gameData.game().isInCheck(ChessGame.TeamColor.WHITE)){
                 if (gameData.game().isInCheckmate(ChessGame.TeamColor.WHITE)){
                     checkMate = true;
+                    winner = gameData.blackUsername();
                 } else {
                     check = true;
                 }
-                checkedPlayer = gameData.blackUsername();
+                checkedPlayer = gameData.whiteUsername();
             }
         } else if (username.equals(gameData.whiteUsername())){
             if (gameData.game().isInCheck(ChessGame.TeamColor.BLACK)){
                 if (gameData.game().isInCheckmate(ChessGame.TeamColor.BLACK)){
                     checkMate = true;
+                    winner = gameData.whiteUsername();
                 } else {
                     check = true;
                 }
-                checkedPlayer = gameData.whiteUsername();
+                checkedPlayer = gameData.blackUsername();
             }
         }
         if (check || checkMate) {
@@ -409,9 +417,9 @@ public class Server {
                 org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
                 String message = null;
                 if (checkMate){
-                    message = String.format("%s is in checkmate", checkedPlayer);
+                    message = String.format("\n%s is in checkmate.\n", checkedPlayer);
                 } else {
-                    message = String.format("%s is in check", checkedPlayer);
+                    message = String.format("\n%s is in check.\n", checkedPlayer);
                 }
 
                 ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
@@ -419,6 +427,7 @@ public class Server {
                 storedSession.getRemote().sendString(jsonNotification);
             }
         }
+        return winner;
     }
 
     private void sendUnauthorizedPieceMoveError(org.eclipse.jetty.websocket.api.Session session) throws Exception{
