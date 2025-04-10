@@ -2,6 +2,7 @@ package server;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import model.GameData;
@@ -354,14 +355,25 @@ public class Server {
         var gameSessionMap = clientSessions.get(command.getGameID());
         for (Map.Entry<String, org.eclipse.jetty.websocket.api.Session> entry : gameSessionMap.entrySet()) {
             org.eclipse.jetty.websocket.api.Session storedSession = entry.getValue();
-            String mesg = String.format("\n%s had moved %s from %s%s to %s%S\n",
-                    username,
-                    updatedGame.game().getBoard().getPiece(move.getEndPosition()).getPieceType().name().toLowerCase(),
-                    numberToLetter(move.getStartPosition().getColumn()),
-                    move.getStartPosition().getRow(),
-                    numberToLetter(move.getEndPosition().getColumn()),
-                    move.getEndPosition().getRow());
-
+            String mesg;
+            if (move.getPromotionPiece() == null) {
+                mesg = String.format("\n%s had moved %s from %s%s to %s%S\n",
+                        username,
+                        updatedGame.game().getBoard().getPiece(move.getEndPosition()).getPieceType().name().toLowerCase(),
+                        numberToLetter(move.getStartPosition().getColumn()),
+                        move.getStartPosition().getRow(),
+                        numberToLetter(move.getEndPosition().getColumn()),
+                        move.getEndPosition().getRow());
+            } else {
+                mesg = String.format("\n%s had moved %s from %s%s to %s%S\nand has promoted piece to %s\n",
+                        username,
+                        updatedGame.game().getBoard().getPiece(move.getEndPosition()).getPieceType().name().toLowerCase(),
+                        numberToLetter(move.getStartPosition().getColumn()),
+                        move.getStartPosition().getRow(),
+                        numberToLetter(move.getEndPosition().getColumn()),
+                        move.getEndPosition().getRow(),
+                        move.getPromotionPiece().toString());
+            }
             ServerMessage notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, mesg);
             String jsonNotification = serializer.toJson(notification);
             if (!session.equals(storedSession)){
@@ -409,6 +421,12 @@ public class Server {
                     check = true;
                 }
                 checkedPlayer = gameData.blackUsername();
+            }
+        } else {
+            if (gameData.game().isInStalemate(ChessGame.TeamColor.WHITE)){
+                winner = "No Winner";
+            } else if (gameData.game().isInStalemate(ChessGame.TeamColor.BLACK)){
+                winner = "No Winner";
             }
         }
         if (check || checkMate) {
